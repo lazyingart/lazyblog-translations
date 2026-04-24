@@ -614,6 +614,7 @@ final class LazyBlog_Translations
                     ['status' => 500, 'target_dir' => $target_dir]
                 );
             }
+            @chmod($target_dir, 0775);
 
             if (!copy(__FILE__, $target_file)) {
                 return new WP_Error(
@@ -623,7 +624,7 @@ final class LazyBlog_Translations
                 );
             }
 
-            @chmod($target_file, 0644);
+            @chmod($target_file, 0664);
             $copied = true;
         }
 
