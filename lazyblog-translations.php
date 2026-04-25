@@ -23,7 +23,7 @@ final class LazyBlog_Translations
 {
     private const PLUGIN_VERSION = '0.4.8';
     private const PLUGIN_REPO_URL = 'https://github.com/lazyingart/lazyblog-translations';
-    private const LAZYBLOG_REPO_URL = 'https://github.com/lachlanchen/LazyBlog';
+    private const LAZYBLOG_REPO_URL = 'https://github.com/lazyingart/LazyBlog';
     private const LAZYBLOG_INSTALL_SCRIPT_URL = 'https://github.com/lazyingart/lazyblog-translations/blob/main/tools/install_lazyblog_translation_api.sh';
     private const LAZYBLOG_INSTALL_SCRIPT_RAW_URL = 'https://raw.githubusercontent.com/lazyingart/lazyblog-translations/main/tools/install_lazyblog_translation_api.sh';
     private const PROVIDER_LAZYBLOG = 'lazyblog';

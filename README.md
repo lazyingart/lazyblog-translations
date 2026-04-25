@@ -73,10 +73,10 @@ cd lazyblog-translations
 tools/install_lazyblog_translation_api.sh
 ```
 
-LazyBlog operator repo direct setup:
+LazyBlog workflow repo setup:
 
 ```bash
-git clone https://github.com/lachlanchen/LazyBlog.git
+git clone https://github.com/lazyingart/LazyBlog.git
 cd LazyBlog
 scripts/install_lazyblog_translation_api.sh
 ```
@@ -108,14 +108,14 @@ wp i18n make-pot . languages/lazyblog-translations.pot --slug=lazyblog-translati
 - Public frontend clicks use signed, short-lived post/language requests.
 - Provider keys stay server-side in WordPress options or constants.
 - Browser code never receives OpenAI, DeepSeek, or LazyBlog bearer tokens.
-- Do not commit `.env`, exported private posts, API keys, application passwords, or deployment logs.
+- Do not commit `.env`, exported posts, API keys, application passwords, or deployment logs.
 
 ## Links
 
 - LazyingArt LLC: https://lazying.art
 - Live blog: https://blog.lazying.art
 - Plugin source: https://github.com/lazyingart/lazyblog-translations
-- LazyBlog workflow source: https://github.com/lachlanchen/LazyBlog
+- LazyBlog workflow source: https://github.com/lazyingart/LazyBlog
 - Maintainer: https://github.com/lachlanchen
 
 ## Support
