@@ -1,43 +1,56 @@
 === LazyBlog Translations ===
 Contributors: lazyingart
-Tags: multilingual, translation, markdown, lazyblog
+Tags: multilingual, translation, markdown, lazyblog, openai, deepseek
 Requires at least: 6.5
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 0.4.5
+Stable tag: 0.4.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-WordPress translation storage and language-switcher rendering for LazyBlog Markdown publishing workflows.
+WordPress translation storage, provider switching, and language-switcher rendering for LazyBlog Markdown publishing workflows.
 
 == Description ==
 
-LazyBlog Translations stores post source language and per-language translations in WordPress post meta. It renders a lightweight floating language switcher and can request missing translations from a configured LazyBlog API service.
+LazyBlog Translations stores post source language and per-language translations in WordPress post meta. It renders a lightweight floating language switcher and can request missing translations from Codex/LazyBlog, OpenAI, or DeepSeek.
 
-The plugin is deliberately decoupled from external AI vendors. The LazyBlog API performs translation, polishing, image handling, and Markdown synchronization. This plugin only stores, renders, and coordinates those results inside WordPress.
+The Codex/LazyBlog provider calls a local LazyBlog API service for richer Markdown publishing workflows. OpenAI and DeepSeek direct providers call hosted chat APIs from WordPress and do not require the local API service.
+
+Links:
+
+* LazyingArt LLC: https://lazying.art
+* Live blog: https://blog.lazying.art
+* GitHub: https://github.com/lazyingart/lazyblog-translations
 
 == Features ==
 
 * Source-language metadata for each post.
 * Maintained language list: Original, Simplified Chinese, Traditional Chinese, English, Japanese, Korean, Vietnamese, Arabic, French, Spanish, German, and Russian.
 * On-demand missing-translation requests with duplicate-job protection.
-* Signed frontend requests and server-side API token forwarding.
+* Provider switch: Codex/LazyBlog local API, OpenAI direct API, or DeepSeek direct API.
+* Signed frontend requests and server-side token/key forwarding.
 * MathJax rendering for Markdown-origin math content.
-* Admin settings for LazyBlog API endpoint, token, model, and reasoning level.
+* Admin settings for LazyBlog endpoint/token/model/reasoning, OpenAI endpoint/key/model, and DeepSeek endpoint/key/model.
 
 == Installation ==
 
 1. Upload the `lazyblog-translations` folder to `/wp-content/plugins/`.
 2. Activate `LazyBlog Translations` from the WordPress Plugins screen.
 3. Open Settings > LazyBlog Translations.
-4. Configure the LazyBlog API endpoint and bearer token.
-5. Save settings and purge caches if the site uses a page cache.
+4. Choose a translation provider.
+5. For Codex/LazyBlog, run `scripts/install_lazyblog_translation_api.sh` from the LazyBlog repo and configure the endpoint plus bearer token.
+6. For OpenAI or DeepSeek, configure the provider API key and model. No local API service is required.
+7. Save settings and purge caches if the site uses a page cache.
 
 == Frequently Asked Questions ==
 
 = Does this plugin translate posts by itself? =
 
-No. It calls the configured LazyBlog API. The local LazyBlog service handles model calls, prompting, and Markdown workflow synchronization.
+It can coordinate translation through three provider modes. Codex/LazyBlog mode calls the local LazyBlog API. OpenAI and DeepSeek modes call hosted chat APIs directly from WordPress and store the JSON result in post meta.
+
+= When do I need the local API service? =
+
+Only when using the Codex/LazyBlog provider. Run `scripts/install_lazyblog_translation_api.sh` from the LazyBlog repo. OpenAI and DeepSeek direct providers do not need tmux or a local service.
 
 = Does this plugin replace TranslatePress, Polylang, or WPML? =
 
@@ -45,9 +58,19 @@ It is a narrower tool for LazyBlog-managed posts. It does not try to translate e
 
 = Where should secrets live? =
 
-Use WordPress options for the plugin bearer token and local `.env` files for the LazyBlog API. Do not commit credentials to the plugin repository.
+Use WordPress options for provider keys and local `.env` files for the LazyBlog API. Do not commit credentials to the plugin repository.
+
+== Sponsors ==
+
+* https://github.com/sponsors/lachlanchen
+* https://github.com/sponsors/lazyingart
 
 == Changelog ==
+
+= 0.4.6 =
+* Added provider switching between Codex/LazyBlog local API, OpenAI direct API, and DeepSeek direct API.
+* Added direct provider endpoint, API key, and model settings.
+* Documented local API installation for Codex users.
 
 = 0.4.5 =
 * Added LazyingArt LLC plugin metadata and fixed update identity with `Update URI`.
@@ -56,4 +79,3 @@ Use WordPress options for the plugin bearer token and local `.env` files for the
 = 0.4.4 =
 * Added configurable translation model and reasoning settings.
 * Added live API support for on-demand translation generation.
-

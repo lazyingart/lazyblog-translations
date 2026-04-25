@@ -3,7 +3,7 @@
  * Plugin Name: LazyBlog Translations
  * Plugin URI: https://lazying.art
  * Description: Stores post translations managed by LazyBlog Markdown workflows, renders a lightweight language switcher, and handles local math rendering.
- * Version: 0.4.5
+ * Version: 0.4.6
  * Requires at least: 6.5
  * Requires PHP: 8.0
  * Author: LazyingArt LLC
@@ -20,18 +20,33 @@ if (!defined('ABSPATH')) {
 
 final class LazyBlog_Translations
 {
-    private const PLUGIN_VERSION = '0.4.5';
+    private const PLUGIN_VERSION = '0.4.6';
+    private const PROVIDER_LAZYBLOG = 'lazyblog';
+    private const PROVIDER_OPENAI = 'openai';
+    private const PROVIDER_DEEPSEEK = 'deepseek';
+    private const DEFAULT_PROVIDER = self::PROVIDER_LAZYBLOG;
     private const META_SOURCE_LANGUAGE = '_lazyblog_source_language';
     private const META_TRANSLATIONS = '_lazyblog_translations';
     private const META_TRANSLATION_JOBS = '_lazyblog_translation_jobs';
     private const OPTION_LANGUAGES = 'lazyblog_translation_languages';
+    private const OPTION_PROVIDER = 'lazyblog_translation_provider';
     private const OPTION_API_ENDPOINT = 'lazyblog_translation_api_endpoint';
     private const OPTION_API_TOKEN = 'lazyblog_translation_api_token';
     private const OPTION_API_MOCK = 'lazyblog_translation_api_mock';
     private const OPTION_API_MODEL = 'lazyblog_translation_api_model';
     private const OPTION_API_REASONING = 'lazyblog_translation_api_reasoning';
+    private const OPTION_OPENAI_ENDPOINT = 'lazyblog_translation_openai_endpoint';
+    private const OPTION_OPENAI_API_KEY = 'lazyblog_translation_openai_api_key';
+    private const OPTION_OPENAI_MODEL = 'lazyblog_translation_openai_model';
+    private const OPTION_DEEPSEEK_ENDPOINT = 'lazyblog_translation_deepseek_endpoint';
+    private const OPTION_DEEPSEEK_API_KEY = 'lazyblog_translation_deepseek_api_key';
+    private const OPTION_DEEPSEEK_MODEL = 'lazyblog_translation_deepseek_model';
     private const DEFAULT_API_MODEL = 'gpt-5.4';
     private const DEFAULT_API_REASONING = 'low';
+    private const DEFAULT_OPENAI_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
+    private const DEFAULT_OPENAI_MODEL = 'gpt-4o';
+    private const DEFAULT_DEEPSEEK_ENDPOINT = 'https://api.deepseek.com/chat/completions';
+    private const DEFAULT_DEEPSEEK_MODEL = 'deepseek-chat';
     private const TRANSLATION_SIGNATURE_TTL = 3600;
 
     private static ?self $instance = null;
@@ -259,6 +274,11 @@ final class LazyBlog_Translations
 
     public function register_settings(): void
     {
+        register_setting('lazyblog_translations', self::OPTION_PROVIDER, [
+            'type' => 'string',
+            'sanitize_callback' => [$this, 'sanitize_translation_provider'],
+            'default' => self::DEFAULT_PROVIDER,
+        ]);
         register_setting('lazyblog_translations', self::OPTION_API_ENDPOINT, [
             'type' => 'string',
             'sanitize_callback' => 'esc_url_raw',
@@ -284,12 +304,60 @@ final class LazyBlog_Translations
             'sanitize_callback' => [$this, 'sanitize_translation_reasoning'],
             'default' => self::DEFAULT_API_REASONING,
         ]);
+        register_setting('lazyblog_translations', self::OPTION_OPENAI_ENDPOINT, [
+            'type' => 'string',
+            'sanitize_callback' => 'esc_url_raw',
+            'default' => self::DEFAULT_OPENAI_ENDPOINT,
+        ]);
+        register_setting('lazyblog_translations', self::OPTION_OPENAI_API_KEY, [
+            'type' => 'string',
+            'sanitize_callback' => [$this, 'sanitize_api_secret'],
+            'default' => '',
+        ]);
+        register_setting('lazyblog_translations', self::OPTION_OPENAI_MODEL, [
+            'type' => 'string',
+            'sanitize_callback' => [$this, 'sanitize_model_name'],
+            'default' => self::DEFAULT_OPENAI_MODEL,
+        ]);
+        register_setting('lazyblog_translations', self::OPTION_DEEPSEEK_ENDPOINT, [
+            'type' => 'string',
+            'sanitize_callback' => 'esc_url_raw',
+            'default' => self::DEFAULT_DEEPSEEK_ENDPOINT,
+        ]);
+        register_setting('lazyblog_translations', self::OPTION_DEEPSEEK_API_KEY, [
+            'type' => 'string',
+            'sanitize_callback' => [$this, 'sanitize_api_secret'],
+            'default' => '',
+        ]);
+        register_setting('lazyblog_translations', self::OPTION_DEEPSEEK_MODEL, [
+            'type' => 'string',
+            'sanitize_callback' => [$this, 'sanitize_model_name'],
+            'default' => self::DEFAULT_DEEPSEEK_MODEL,
+        ]);
+    }
+
+    public function sanitize_translation_provider($value): string
+    {
+        $provider = strtolower(sanitize_key((string) $value));
+        return in_array($provider, [self::PROVIDER_LAZYBLOG, self::PROVIDER_OPENAI, self::PROVIDER_DEEPSEEK], true)
+            ? $provider
+            : self::DEFAULT_PROVIDER;
     }
 
     public function sanitize_translation_model($value): string
     {
         $model = sanitize_text_field((string) $value);
         return $model !== '' ? $model : self::DEFAULT_API_MODEL;
+    }
+
+    public function sanitize_model_name($value): string
+    {
+        return sanitize_text_field((string) $value);
+    }
+
+    public function sanitize_api_secret($value): string
+    {
+        return sanitize_text_field((string) $value);
     }
 
     public function sanitize_translation_reasoning($value): string
@@ -309,14 +377,27 @@ final class LazyBlog_Translations
         echo '<form method="post" action="options.php">';
         settings_fields('lazyblog_translations');
         echo '<table class="form-table" role="presentation">';
+        echo '<tr><th scope="row"><label for="' . esc_attr(self::OPTION_PROVIDER) . '">' . esc_html__('Translation provider', 'lazyblog-translations') . '</label></th><td>';
+        echo '<select id="' . esc_attr(self::OPTION_PROVIDER) . '" name="' . esc_attr(self::OPTION_PROVIDER) . '">';
+        foreach ($this->translation_providers() as $provider => $label) {
+            printf(
+                '<option value="%s"%s>%s</option>',
+                esc_attr($provider),
+                selected($this->translation_provider(), $provider, false),
+                esc_html($label)
+            );
+        }
+        echo '</select>';
+        echo '<p class="description">' . esc_html__('Codex uses the local LazyBlog API. OpenAI and DeepSeek call their hosted APIs directly and do not need the local service.', 'lazyblog-translations') . '</p></td></tr>';
+        echo '<tr><th colspan="2"><h2>' . esc_html__('Codex / LazyBlog local API', 'lazyblog-translations') . '</h2></th></tr>';
         echo '<tr><th scope="row"><label for="' . esc_attr(self::OPTION_API_ENDPOINT) . '">' . esc_html__('LazyBlog API endpoint', 'lazyblog-translations') . '</label></th><td>';
         printf(
             '<input type="url" class="regular-text code" id="%1$s" name="%1$s" value="%2$s" placeholder="http://host.docker.internal:8765/api/translate/jobs">',
             esc_attr(self::OPTION_API_ENDPOINT),
             esc_attr($this->api_endpoint())
         );
-        echo '<p class="description">' . esc_html__('POST endpoint for LazyBlog Studio translation jobs.', 'lazyblog-translations') . '</p></td></tr>';
-        echo '<tr><th scope="row"><label for="' . esc_attr(self::OPTION_API_TOKEN) . '">' . esc_html__('API bearer token', 'lazyblog-translations') . '</label></th><td>';
+        echo '<p class="description">' . esc_html__('POST endpoint for LazyBlog Studio translation jobs. If you choose Codex, install the local API with scripts/install_lazyblog_translation_api.sh in the LazyBlog repo.', 'lazyblog-translations') . '</p></td></tr>';
+        echo '<tr><th scope="row"><label for="' . esc_attr(self::OPTION_API_TOKEN) . '">' . esc_html__('LazyBlog bearer token', 'lazyblog-translations') . '</label></th><td>';
         printf(
             '<input type="password" class="regular-text code" id="%1$s" name="%1$s" value="%2$s" autocomplete="new-password">',
             esc_attr(self::OPTION_API_TOKEN),
@@ -351,6 +432,54 @@ final class LazyBlog_Translations
             esc_html__('Send mock=true to LazyBlog Studio for local smoke tests.', 'lazyblog-translations')
         );
         echo '</label></td></tr>';
+        echo '<tr><th colspan="2"><h2>' . esc_html__('OpenAI direct API', 'lazyblog-translations') . '</h2></th></tr>';
+        echo '<tr><th scope="row"><label for="' . esc_attr(self::OPTION_OPENAI_ENDPOINT) . '">' . esc_html__('OpenAI chat endpoint', 'lazyblog-translations') . '</label></th><td>';
+        printf(
+            '<input type="url" class="regular-text code" id="%1$s" name="%1$s" value="%2$s" placeholder="%3$s">',
+            esc_attr(self::OPTION_OPENAI_ENDPOINT),
+            esc_attr($this->openai_endpoint()),
+            esc_attr(self::DEFAULT_OPENAI_ENDPOINT)
+        );
+        echo '<p class="description">' . esc_html__('Default is the OpenAI Chat Completions endpoint.', 'lazyblog-translations') . '</p></td></tr>';
+        echo '<tr><th scope="row"><label for="' . esc_attr(self::OPTION_OPENAI_API_KEY) . '">' . esc_html__('OpenAI API key', 'lazyblog-translations') . '</label></th><td>';
+        printf(
+            '<input type="password" class="regular-text code" id="%1$s" name="%1$s" value="%2$s" autocomplete="new-password">',
+            esc_attr(self::OPTION_OPENAI_API_KEY),
+            esc_attr($this->openai_api_key())
+        );
+        echo '<p class="description">' . esc_html__('Stored server-side. The browser never receives this key.', 'lazyblog-translations') . '</p></td></tr>';
+        echo '<tr><th scope="row"><label for="' . esc_attr(self::OPTION_OPENAI_MODEL) . '">' . esc_html__('OpenAI model', 'lazyblog-translations') . '</label></th><td>';
+        printf(
+            '<input type="text" class="regular-text code" id="%1$s" name="%1$s" value="%2$s" placeholder="%3$s">',
+            esc_attr(self::OPTION_OPENAI_MODEL),
+            esc_attr($this->openai_model()),
+            esc_attr(self::DEFAULT_OPENAI_MODEL)
+        );
+        echo '<p class="description">' . esc_html__('Default: gpt-4o. Direct mode is best for short and medium posts; use Codex/LazyBlog for long polishing workflows.', 'lazyblog-translations') . '</p></td></tr>';
+        echo '<tr><th colspan="2"><h2>' . esc_html__('DeepSeek direct API', 'lazyblog-translations') . '</h2></th></tr>';
+        echo '<tr><th scope="row"><label for="' . esc_attr(self::OPTION_DEEPSEEK_ENDPOINT) . '">' . esc_html__('DeepSeek chat endpoint', 'lazyblog-translations') . '</label></th><td>';
+        printf(
+            '<input type="url" class="regular-text code" id="%1$s" name="%1$s" value="%2$s" placeholder="%3$s">',
+            esc_attr(self::OPTION_DEEPSEEK_ENDPOINT),
+            esc_attr($this->deepseek_endpoint()),
+            esc_attr(self::DEFAULT_DEEPSEEK_ENDPOINT)
+        );
+        echo '<p class="description">' . esc_html__('Default is the DeepSeek OpenAI-compatible chat endpoint.', 'lazyblog-translations') . '</p></td></tr>';
+        echo '<tr><th scope="row"><label for="' . esc_attr(self::OPTION_DEEPSEEK_API_KEY) . '">' . esc_html__('DeepSeek API key', 'lazyblog-translations') . '</label></th><td>';
+        printf(
+            '<input type="password" class="regular-text code" id="%1$s" name="%1$s" value="%2$s" autocomplete="new-password">',
+            esc_attr(self::OPTION_DEEPSEEK_API_KEY),
+            esc_attr($this->deepseek_api_key())
+        );
+        echo '<p class="description">' . esc_html__('Stored server-side. The browser never receives this key.', 'lazyblog-translations') . '</p></td></tr>';
+        echo '<tr><th scope="row"><label for="' . esc_attr(self::OPTION_DEEPSEEK_MODEL) . '">' . esc_html__('DeepSeek model', 'lazyblog-translations') . '</label></th><td>';
+        printf(
+            '<input type="text" class="regular-text code" id="%1$s" name="%1$s" value="%2$s" placeholder="%3$s">',
+            esc_attr(self::OPTION_DEEPSEEK_MODEL),
+            esc_attr($this->deepseek_model()),
+            esc_attr(self::DEFAULT_DEEPSEEK_MODEL)
+        );
+        echo '<p class="description">' . esc_html__('Default: deepseek-chat.', 'lazyblog-translations') . '</p></td></tr>';
         echo '</table>';
         submit_button();
         echo '</form></div>';
@@ -673,6 +802,10 @@ final class LazyBlog_Translations
             ]);
         }
 
+        if ($this->translation_provider() !== self::PROVIDER_LAZYBLOG) {
+            return $this->rest_ensure_direct_provider_translation($post_id, $language, $redirect_url);
+        }
+
         $jobs = $this->get_translation_jobs($post_id);
         $job = $jobs[$language] ?? null;
         if (is_array($job) && !empty($job['job_id']) && in_array(($job['status'] ?? ''), ['queued', 'running'], true)) {
@@ -712,6 +845,66 @@ final class LazyBlog_Translations
             'message' => __('Translation job started.', 'lazyblog-translations'),
             'poll_after' => 2,
         ]);
+    }
+
+    private function rest_ensure_direct_provider_translation(int $post_id, string $language, string $redirect_url): WP_REST_Response
+    {
+        $provider = $this->translation_provider();
+        $lock_key = $this->translation_lock_key($post_id, $language);
+        if (get_transient($lock_key)) {
+            return new WP_REST_Response([
+                'post_id' => $post_id,
+                'language' => $language,
+                'provider' => $provider,
+                'status' => 'queued',
+                'message' => __('Translation is already running.', 'lazyblog-translations'),
+                'poll_after' => 2,
+            ]);
+        }
+
+        set_transient($lock_key, 1, 2 * MINUTE_IN_SECONDS);
+        $this->update_translation_job($post_id, $language, [
+            'provider' => $provider,
+            'job_id' => $provider . '-' . wp_generate_uuid4(),
+            'status' => 'running',
+            'model' => $this->direct_provider_model($provider),
+        ]);
+
+        try {
+            $translation = $this->generate_direct_provider_translation($post_id, $language);
+            if (is_wp_error($translation)) {
+                $this->update_translation_job($post_id, $language, [
+                    'provider' => $provider,
+                    'status' => 'failed',
+                    'error' => $translation->get_error_message(),
+                ]);
+
+                return new WP_REST_Response([
+                    'post_id' => $post_id,
+                    'language' => $language,
+                    'provider' => $provider,
+                    'status' => 'failed',
+                    'message' => $translation->get_error_message(),
+                ], 502);
+            }
+
+            $this->store_translation_output($post_id, $language, $translation);
+            $this->update_translation_job($post_id, $language, [
+                'provider' => $provider,
+                'status' => 'succeeded',
+                'model' => $this->direct_provider_model($provider),
+            ]);
+
+            return new WP_REST_Response([
+                'post_id' => $post_id,
+                'language' => $language,
+                'provider' => $provider,
+                'status' => 'ready',
+                'redirect_url' => $redirect_url,
+            ]);
+        } finally {
+            delete_transient($lock_key);
+        }
     }
 
     public function filter_title(string $title, int $post_id = 0): string
@@ -1334,6 +1527,25 @@ final class LazyBlog_Translations
         return 'lazyblog_translate_lock_' . $post_id . '_' . md5($language);
     }
 
+    private function translation_providers(): array
+    {
+        return [
+            self::PROVIDER_LAZYBLOG => __('Codex / LazyBlog local API', 'lazyblog-translations'),
+            self::PROVIDER_OPENAI => __('OpenAI direct API', 'lazyblog-translations'),
+            self::PROVIDER_DEEPSEEK => __('DeepSeek direct API', 'lazyblog-translations'),
+        ];
+    }
+
+    private function translation_provider(): string
+    {
+        if (defined('LAZYBLOG_TRANSLATION_PROVIDER')) {
+            return $this->sanitize_translation_provider((string) constant('LAZYBLOG_TRANSLATION_PROVIDER'));
+        }
+
+        $configured = get_option(self::OPTION_PROVIDER, self::DEFAULT_PROVIDER);
+        return $this->sanitize_translation_provider(is_string($configured) ? $configured : '');
+    }
+
     private function api_endpoint(): string
     {
         if (defined('LAZYBLOG_TRANSLATION_API_ENDPOINT')) {
@@ -1394,6 +1606,80 @@ final class LazyBlog_Translations
         return $this->sanitize_translation_reasoning(is_string($configured) ? $configured : '');
     }
 
+    private function openai_endpoint(): string
+    {
+        if (defined('LAZYBLOG_OPENAI_CHAT_ENDPOINT')) {
+            return (string) constant('LAZYBLOG_OPENAI_CHAT_ENDPOINT');
+        }
+
+        $configured = get_option(self::OPTION_OPENAI_ENDPOINT, self::DEFAULT_OPENAI_ENDPOINT);
+        return is_string($configured) && trim($configured) !== '' ? trim($configured) : self::DEFAULT_OPENAI_ENDPOINT;
+    }
+
+    private function openai_api_key(): string
+    {
+        if (defined('LAZYBLOG_OPENAI_API_KEY')) {
+            return (string) constant('LAZYBLOG_OPENAI_API_KEY');
+        }
+
+        $env_key = getenv('OPENAI_API_KEY');
+        if (is_string($env_key) && trim($env_key) !== '') {
+            return trim($env_key);
+        }
+
+        $configured = get_option(self::OPTION_OPENAI_API_KEY);
+        return is_string($configured) ? trim($configured) : '';
+    }
+
+    private function openai_model(): string
+    {
+        if (defined('LAZYBLOG_OPENAI_MODEL')) {
+            $model = $this->sanitize_model_name((string) constant('LAZYBLOG_OPENAI_MODEL'));
+            return $model !== '' ? $model : self::DEFAULT_OPENAI_MODEL;
+        }
+
+        $configured = get_option(self::OPTION_OPENAI_MODEL, self::DEFAULT_OPENAI_MODEL);
+        $model = $this->sanitize_model_name(is_string($configured) ? $configured : '');
+        return $model !== '' ? $model : self::DEFAULT_OPENAI_MODEL;
+    }
+
+    private function deepseek_endpoint(): string
+    {
+        if (defined('LAZYBLOG_DEEPSEEK_CHAT_ENDPOINT')) {
+            return (string) constant('LAZYBLOG_DEEPSEEK_CHAT_ENDPOINT');
+        }
+
+        $configured = get_option(self::OPTION_DEEPSEEK_ENDPOINT, self::DEFAULT_DEEPSEEK_ENDPOINT);
+        return is_string($configured) && trim($configured) !== '' ? trim($configured) : self::DEFAULT_DEEPSEEK_ENDPOINT;
+    }
+
+    private function deepseek_api_key(): string
+    {
+        if (defined('LAZYBLOG_DEEPSEEK_API_KEY')) {
+            return (string) constant('LAZYBLOG_DEEPSEEK_API_KEY');
+        }
+
+        $env_key = getenv('DEEPSEEK_API_KEY');
+        if (is_string($env_key) && trim($env_key) !== '') {
+            return trim($env_key);
+        }
+
+        $configured = get_option(self::OPTION_DEEPSEEK_API_KEY);
+        return is_string($configured) ? trim($configured) : '';
+    }
+
+    private function deepseek_model(): string
+    {
+        if (defined('LAZYBLOG_DEEPSEEK_MODEL')) {
+            $model = $this->sanitize_model_name((string) constant('LAZYBLOG_DEEPSEEK_MODEL'));
+            return $model !== '' ? $model : self::DEFAULT_DEEPSEEK_MODEL;
+        }
+
+        $configured = get_option(self::OPTION_DEEPSEEK_MODEL, self::DEFAULT_DEEPSEEK_MODEL);
+        $model = $this->sanitize_model_name(is_string($configured) ? $configured : '');
+        return $model !== '' ? $model : self::DEFAULT_DEEPSEEK_MODEL;
+    }
+
     private function lazyblog_api_url(string $path): string
     {
         $endpoint = $this->api_endpoint();
@@ -1448,6 +1734,174 @@ final class LazyBlog_Translations
         ]);
 
         return $this->decode_lazyblog_api_response($response);
+    }
+
+    private function direct_provider_model(string $provider): string
+    {
+        if ($provider === self::PROVIDER_OPENAI) {
+            return $this->openai_model();
+        }
+
+        if ($provider === self::PROVIDER_DEEPSEEK) {
+            return $this->deepseek_model();
+        }
+
+        return $this->api_model();
+    }
+
+    private function direct_provider_endpoint(string $provider): string
+    {
+        if ($provider === self::PROVIDER_OPENAI) {
+            return $this->openai_endpoint();
+        }
+
+        if ($provider === self::PROVIDER_DEEPSEEK) {
+            return $this->deepseek_endpoint();
+        }
+
+        return '';
+    }
+
+    private function direct_provider_api_key(string $provider): string
+    {
+        if ($provider === self::PROVIDER_OPENAI) {
+            return $this->openai_api_key();
+        }
+
+        if ($provider === self::PROVIDER_DEEPSEEK) {
+            return $this->deepseek_api_key();
+        }
+
+        return '';
+    }
+
+    private function generate_direct_provider_translation(int $post_id, string $language)
+    {
+        $provider = $this->translation_provider();
+        $endpoint = $this->direct_provider_endpoint($provider);
+        $api_key = $this->direct_provider_api_key($provider);
+        if ($endpoint === '' || $api_key === '') {
+            return new WP_Error('lazyblog_direct_provider_not_configured', 'Direct translation provider is not configured.', ['status' => 503]);
+        }
+
+        $payload = $this->direct_provider_payload($post_id, $language, $provider);
+        $response = wp_remote_post($endpoint, [
+            'timeout' => 90,
+            'headers' => [
+                'Authorization' => 'Bearer ' . $api_key,
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ],
+            'body' => wp_json_encode($payload),
+        ]);
+
+        return $this->decode_direct_provider_response($response);
+    }
+
+    private function direct_provider_payload(int $post_id, string $language, string $provider): array
+    {
+        $payload = [
+            'model' => $this->direct_provider_model($provider),
+            'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => $this->direct_provider_system_prompt(),
+                ],
+                [
+                    'role' => 'user',
+                    'content' => $this->direct_provider_user_prompt($post_id, $language),
+                ],
+            ],
+            'temperature' => 0.2,
+            'response_format' => [
+                'type' => 'json_object',
+            ],
+        ];
+
+        if ($provider === self::PROVIDER_OPENAI) {
+            $payload['max_completion_tokens'] = 4096;
+        } elseif ($provider === self::PROVIDER_DEEPSEEK) {
+            $payload['max_tokens'] = 8192;
+        }
+
+        return $payload;
+    }
+
+    private function direct_provider_system_prompt(): string
+    {
+        return 'You are a careful multilingual WordPress blog translator. Return only a JSON object with keys "title", "content", and "excerpt". Preserve the author voice, paragraph structure, HTML, Markdown, WordPress shortcodes, code blocks, math notation, links, image markup, and factual meaning. Do not add AI disclaimers, prefaces, summaries, or invented details.';
+    }
+
+    private function direct_provider_user_prompt(int $post_id, string $language): string
+    {
+        $payload = $this->translation_api_payload($post_id, $language);
+        unset($payload['mock'], $payload['model'], $payload['reasoning']);
+
+        return sprintf(
+            "Translate this WordPress post from %s (%s) into %s (%s). Return valid JSON only.\n\n%s",
+            (string) ($payload['source_label'] ?? ''),
+            (string) ($payload['source_language'] ?? ''),
+            (string) ($payload['target_label'] ?? ''),
+            (string) ($payload['target_language'] ?? ''),
+            wp_json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT)
+        );
+    }
+
+    private function decode_direct_provider_response($response)
+    {
+        if (is_wp_error($response)) {
+            return $response;
+        }
+
+        $code = (int) wp_remote_retrieve_response_code($response);
+        $body = (string) wp_remote_retrieve_body($response);
+        $decoded = json_decode($body, true);
+        if (!is_array($decoded)) {
+            return new WP_Error('lazyblog_direct_provider_bad_response', 'Direct provider returned invalid JSON.', ['status' => 502, 'body' => $body]);
+        }
+
+        if ($code < 200 || $code >= 300) {
+            $message = (string) ($decoded['error']['message'] ?? 'Direct provider request failed.');
+            return new WP_Error('lazyblog_direct_provider_failed', $message, ['status' => $code ?: 502, 'body' => $decoded]);
+        }
+
+        $content = (string) ($decoded['choices'][0]['message']['content'] ?? '');
+        $translation = $this->decode_direct_provider_json_content($content);
+        if (is_wp_error($translation)) {
+            return $translation;
+        }
+
+        if (trim((string) ($translation['content'] ?? '')) === '') {
+            return new WP_Error('lazyblog_direct_provider_empty_content', 'Direct provider returned an empty translation.', ['status' => 502]);
+        }
+
+        return [
+            'title' => (string) ($translation['title'] ?? ''),
+            'content' => (string) ($translation['content'] ?? ''),
+            'excerpt' => (string) ($translation['excerpt'] ?? ''),
+        ];
+    }
+
+    private function decode_direct_provider_json_content(string $content)
+    {
+        $trimmed = trim($content);
+        $trimmed = preg_replace('/^```(?:json)?\s*/i', '', $trimmed) ?? $trimmed;
+        $trimmed = preg_replace('/\s*```$/', '', $trimmed) ?? $trimmed;
+
+        $decoded = json_decode($trimmed, true);
+        if (!is_array($decoded)) {
+            $start = strpos($trimmed, '{');
+            $end = strrpos($trimmed, '}');
+            if ($start !== false && $end !== false && $end > $start) {
+                $decoded = json_decode(substr($trimmed, $start, $end - $start + 1), true);
+            }
+        }
+
+        if (!is_array($decoded)) {
+            return new WP_Error('lazyblog_direct_provider_unparseable_content', 'Direct provider response did not contain a valid translation JSON object.', ['status' => 502, 'content' => $content]);
+        }
+
+        return $decoded;
     }
 
     private function decode_lazyblog_api_response($response)
