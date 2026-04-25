@@ -4,7 +4,7 @@ Tags: multilingual, translation, markdown, lazyblog, openai, deepseek
 Requires at least: 6.5
 Tested up to: 6.9
 Requires PHP: 8.0
-Stable tag: 0.4.6
+Stable tag: 0.4.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,6 +30,7 @@ Links:
 * Provider switch: Codex/LazyBlog local API, OpenAI direct API, or DeepSeek direct API.
 * Signed frontend requests and server-side token/key forwarding.
 * MathJax rendering for Markdown-origin math content.
+* WordPress i18n support with text domain, domain path, and POT template.
 * Admin settings for LazyBlog endpoint/token/model/reasoning, OpenAI endpoint/key/model, and DeepSeek endpoint/key/model.
 
 == Installation ==
@@ -41,6 +42,12 @@ Links:
 5. For Codex/LazyBlog, run `scripts/install_lazyblog_translation_api.sh` from the LazyBlog repo and configure the endpoint plus bearer token.
 6. For OpenAI or DeepSeek, configure the provider API key and model. No local API service is required.
 7. Save settings and purge caches if the site uses a page cache.
+
+== Localization ==
+
+The plugin loads `lazyblog-translations` through WordPress textdomain support and ships `languages/lazyblog-translations.pot` for translators.
+
+GitHub README starter translations are available in `i18n/`.
 
 == Frequently Asked Questions ==
 
@@ -66,6 +73,13 @@ Use WordPress options for provider keys and local `.env` files for the LazyBlog 
 * https://github.com/sponsors/lazyingart
 
 == Changelog ==
+
+= 0.4.7 =
+* Added WordPress i18n loading, domain path, and POT template.
+* Added localized GitHub README starters.
+* Added LazyingArt banner, donation panel, and more vivid README presentation.
+* Added plugin-repo bootstrap script for Codex local API setup.
+* Added direct GitHub setup links in WordPress settings.
 
 = 0.4.6 =
 * Added provider switching between Codex/LazyBlog local API, OpenAI direct API, and DeepSeek direct API.

@@ -3,7 +3,7 @@
  * Plugin Name: LazyBlog Translations
  * Plugin URI: https://lazying.art
  * Description: Stores post translations managed by LazyBlog Markdown workflows, renders a lightweight language switcher, and handles local math rendering.
- * Version: 0.4.6
+ * Version: 0.4.7
  * Requires at least: 6.5
  * Requires PHP: 8.0
  * Author: LazyingArt LLC
@@ -11,6 +11,7 @@
  * License: GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: lazyblog-translations
+ * Domain Path: /languages
  * Update URI: https://github.com/LazyingArt/lazyblog-translations
  */
 
@@ -20,7 +21,11 @@ if (!defined('ABSPATH')) {
 
 final class LazyBlog_Translations
 {
-    private const PLUGIN_VERSION = '0.4.6';
+    private const PLUGIN_VERSION = '0.4.7';
+    private const PLUGIN_REPO_URL = 'https://github.com/lazyingart/lazyblog-translations';
+    private const LAZYBLOG_REPO_URL = 'https://github.com/lachlanchen/LazyBlog';
+    private const LAZYBLOG_INSTALL_SCRIPT_URL = 'https://github.com/lazyingart/lazyblog-translations/blob/main/tools/install_lazyblog_translation_api.sh';
+    private const LAZYBLOG_INSTALL_SCRIPT_RAW_URL = 'https://raw.githubusercontent.com/lazyingart/lazyblog-translations/main/tools/install_lazyblog_translation_api.sh';
     private const PROVIDER_LAZYBLOG = 'lazyblog';
     private const PROVIDER_OPENAI = 'openai';
     private const PROVIDER_DEEPSEEK = 'deepseek';
@@ -66,6 +71,7 @@ final class LazyBlog_Translations
 
     private function __construct()
     {
+        add_action('plugins_loaded', [$this, 'load_textdomain']);
         add_action('plugins_loaded', [$this, 'capture_language_prefix'], 0);
         add_action('init', [$this, 'register_meta']);
         add_action('init', [$this, 'register_rewrite_rules']);
@@ -87,6 +93,15 @@ final class LazyBlog_Translations
         add_filter('the_content', [$this, 'filter_content'], 20);
         add_filter('language_attributes', [$this, 'filter_language_attributes'], 20);
         add_filter('redirect_canonical', [$this, 'filter_redirect_canonical'], 20, 2);
+    }
+
+    public function load_textdomain(): void
+    {
+        load_plugin_textdomain(
+            'lazyblog-translations',
+            false,
+            dirname(plugin_basename(__FILE__)) . '/languages'
+        );
     }
 
     public static function activate(): void
@@ -374,6 +389,7 @@ final class LazyBlog_Translations
 
         echo '<div class="wrap">';
         echo '<h1>' . esc_html__('LazyBlog Translations', 'lazyblog-translations') . '</h1>';
+        $this->render_settings_intro();
         echo '<form method="post" action="options.php">';
         settings_fields('lazyblog_translations');
         echo '<table class="form-table" role="presentation">';
@@ -390,6 +406,20 @@ final class LazyBlog_Translations
         echo '</select>';
         echo '<p class="description">' . esc_html__('Codex uses the local LazyBlog API. OpenAI and DeepSeek call their hosted APIs directly and do not need the local service.', 'lazyblog-translations') . '</p></td></tr>';
         echo '<tr><th colspan="2"><h2>' . esc_html__('Codex / LazyBlog local API', 'lazyblog-translations') . '</h2></th></tr>';
+        echo '<tr><th scope="row">' . esc_html__('Codex setup script', 'lazyblog-translations') . '</th><td>';
+        printf(
+            '<p><a class="button button-secondary" href="%1$s" target="_blank" rel="noopener">%2$s</a></p>',
+            esc_url(self::LAZYBLOG_INSTALL_SCRIPT_URL),
+            esc_html__('Open setup script on GitHub', 'lazyblog-translations')
+        );
+        printf(
+            '<p class="description">%s</p><pre class="lazyblog-admin-code"><code>git clone %s LazyBlog
+cd LazyBlog
+scripts/install_lazyblog_translation_api.sh</code></pre>',
+            esc_html__('Use this only for the Codex provider. OpenAI and DeepSeek do not need the local API service.', 'lazyblog-translations'),
+            esc_html(self::LAZYBLOG_REPO_URL)
+        );
+        echo '</td></tr>';
         echo '<tr><th scope="row"><label for="' . esc_attr(self::OPTION_API_ENDPOINT) . '">' . esc_html__('LazyBlog API endpoint', 'lazyblog-translations') . '</label></th><td>';
         printf(
             '<input type="url" class="regular-text code" id="%1$s" name="%1$s" value="%2$s" placeholder="http://host.docker.internal:8765/api/translate/jobs">',
@@ -483,6 +513,40 @@ final class LazyBlog_Translations
         echo '</table>';
         submit_button();
         echo '</form></div>';
+    }
+
+    private function render_settings_intro(): void
+    {
+        echo '<style>
+.lazyblog-admin-hero{position:relative;margin:16px 0 22px;padding:24px;border:1px solid #cbd5e1;border-radius:18px;background:linear-gradient(135deg,#0f766e 0%,#0f172a 56%,#7c2d12 100%);color:#fff;box-shadow:0 18px 40px rgba(15,23,42,.18);overflow:hidden}
+.lazyblog-admin-hero:after{content:"";position:absolute;right:-70px;top:-90px;width:240px;height:240px;border-radius:999px;background:rgba(255,255,255,.12)}
+.lazyblog-admin-hero h2{margin:0 0 8px;color:#fff;font-size:26px;line-height:1.2}
+.lazyblog-admin-hero p{max-width:760px;margin:0 0 14px;color:#ecfeff;font-size:14px}
+.lazyblog-admin-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.lazyblog-admin-actions a{display:inline-flex;align-items:center;min-height:32px;padding:0 14px;border-radius:999px;background:#fff;color:#0f172a;text-decoration:none;font-weight:600}
+.lazyblog-admin-actions a:hover{background:#ccfbf1;color:#0f172a}
+.lazyblog-admin-code{display:inline-block;max-width:100%;margin:8px 0 0;padding:12px 14px;border-radius:12px;background:#0f172a;color:#d1fae5;overflow:auto}
+</style>';
+        echo '<div class="lazyblog-admin-hero">';
+        echo '<h2>' . esc_html__('One switcher, three translation engines.', 'lazyblog-translations') . '</h2>';
+        echo '<p>' . esc_html__('Choose Codex/LazyBlog for local automation, OpenAI for hosted GPT translation, or DeepSeek for an OpenAI-compatible hosted path. The frontend language switcher keeps the same clean reader experience.', 'lazyblog-translations') . '</p>';
+        echo '<div class="lazyblog-admin-actions">';
+        printf(
+            '<a href="%1$s" target="_blank" rel="noopener">%2$s</a>',
+            esc_url(self::PLUGIN_REPO_URL),
+            esc_html__('Plugin GitHub', 'lazyblog-translations')
+        );
+        printf(
+            '<a href="%1$s" target="_blank" rel="noopener">%2$s</a>',
+            esc_url(self::LAZYBLOG_INSTALL_SCRIPT_URL),
+            esc_html__('Codex setup script', 'lazyblog-translations')
+        );
+        printf(
+            '<a href="%1$s" target="_blank" rel="noopener">%2$s</a>',
+            esc_url(self::LAZYBLOG_INSTALL_SCRIPT_RAW_URL),
+            esc_html__('Raw installer', 'lazyblog-translations')
+        );
+        echo '</div></div>';
     }
 
     public function register_query_vars(array $query_vars): array
@@ -597,11 +661,11 @@ final class LazyBlog_Translations
         $language = $this->normalize_language((string) $request['lang']);
         $post = get_post($post_id);
         if (!$post instanceof WP_Post || $post->post_type !== 'post' || $language === null) {
-            return new WP_Error('lazyblog_translation_not_allowed', 'Invalid translation request.', ['status' => 404]);
+            return new WP_Error('lazyblog_translation_not_allowed', __('Invalid translation request.', 'lazyblog-translations'), ['status' => 404]);
         }
 
         if ($post->post_status !== 'publish' && !current_user_can('read_post', $post_id)) {
-            return new WP_Error('lazyblog_translation_not_allowed', 'Post is not public.', ['status' => 403]);
+            return new WP_Error('lazyblog_translation_not_allowed', __('Post is not public.', 'lazyblog-translations'), ['status' => 403]);
         }
 
         $params = $this->json_params($request);
@@ -609,11 +673,11 @@ final class LazyBlog_Translations
         $expires = isset($params['expires']) ? (int) $params['expires'] : 0;
         $signature = isset($params['signature']) ? (string) $params['signature'] : '';
         if (!$this->verify_translation_request($post_id, $language, $request_key, $expires, $signature)) {
-            return new WP_Error('lazyblog_bad_translation_signature', 'Invalid or expired translation signature.', ['status' => 403]);
+            return new WP_Error('lazyblog_bad_translation_signature', __('Invalid or expired translation signature.', 'lazyblog-translations'), ['status' => 403]);
         }
 
         if (!$this->rate_limit_ok()) {
-            return new WP_Error('lazyblog_translation_rate_limited', 'Too many translation requests. Try again later.', ['status' => 429]);
+            return new WP_Error('lazyblog_translation_rate_limited', __('Too many translation requests. Try again later.', 'lazyblog-translations'), ['status' => 429]);
         }
 
         return true;
@@ -640,7 +704,7 @@ final class LazyBlog_Translations
         if (isset($params['source_language'])) {
             $source_language = $this->normalize_language((string) $params['source_language']);
             if ($source_language === null) {
-                return new WP_Error('lazyblog_invalid_language', 'Unsupported source language.', ['status' => 400]);
+                return new WP_Error('lazyblog_invalid_language', __('Unsupported source language.', 'lazyblog-translations'), ['status' => 400]);
             }
             update_post_meta($post_id, self::META_SOURCE_LANGUAGE, $source_language);
         }
@@ -653,12 +717,12 @@ final class LazyBlog_Translations
         $post_id = (int) $request['id'];
         $language = $this->normalize_language((string) $request['lang']);
         if ($language === null) {
-            return new WP_Error('lazyblog_invalid_language', 'Unsupported language.', ['status' => 400]);
+            return new WP_Error('lazyblog_invalid_language', __('Unsupported language.', 'lazyblog-translations'), ['status' => 400]);
         }
 
         $translation = $this->get_translation($post_id, $language);
         if ($translation === null) {
-            return new WP_Error('lazyblog_translation_not_found', 'Translation not found.', ['status' => 404]);
+            return new WP_Error('lazyblog_translation_not_found', __('Translation not found.', 'lazyblog-translations'), ['status' => 404]);
         }
 
         return new WP_REST_Response([
@@ -673,14 +737,14 @@ final class LazyBlog_Translations
         $post_id = (int) $request['id'];
         $language = $this->normalize_language((string) $request['lang']);
         if ($language === null) {
-            return new WP_Error('lazyblog_invalid_language', 'Unsupported language.', ['status' => 400]);
+            return new WP_Error('lazyblog_invalid_language', __('Unsupported language.', 'lazyblog-translations'), ['status' => 400]);
         }
 
         $params = $this->json_params($request);
         if (isset($params['source_language'])) {
             $source_language = $this->normalize_language((string) $params['source_language']);
             if ($source_language === null) {
-                return new WP_Error('lazyblog_invalid_source_language', 'Unsupported source language.', ['status' => 400]);
+                return new WP_Error('lazyblog_invalid_source_language', __('Unsupported source language.', 'lazyblog-translations'), ['status' => 400]);
             }
             update_post_meta($post_id, self::META_SOURCE_LANGUAGE, $source_language);
         }
@@ -708,7 +772,7 @@ final class LazyBlog_Translations
         $post_id = (int) $request['id'];
         $language = $this->normalize_language((string) $request['lang']);
         if ($language === null) {
-            return new WP_Error('lazyblog_invalid_language', 'Unsupported language.', ['status' => 400]);
+            return new WP_Error('lazyblog_invalid_language', __('Unsupported language.', 'lazyblog-translations'), ['status' => 400]);
         }
 
         $translations = $this->get_translations($post_id);
@@ -739,7 +803,7 @@ final class LazyBlog_Translations
             if (!wp_mkdir_p($target_dir)) {
                 return new WP_Error(
                     'lazyblog_plugin_mkdir_failed',
-                    'Could not create the LazyBlog plugin directory.',
+                    __('Could not create the LazyBlog plugin directory.', 'lazyblog-translations'),
                     ['status' => 500, 'target_dir' => $target_dir]
                 );
             }
@@ -748,7 +812,7 @@ final class LazyBlog_Translations
             if (!copy(__FILE__, $target_file)) {
                 return new WP_Error(
                     'lazyblog_plugin_copy_failed',
-                    'Could not copy LazyBlog Translations into its own plugin directory.',
+                    __('Could not copy LazyBlog Translations into its own plugin directory.', 'lazyblog-translations'),
                     ['status' => 500, 'target_file' => $target_file]
                 );
             }
@@ -788,7 +852,7 @@ final class LazyBlog_Translations
         $post_id = (int) $request['id'];
         $language = $this->normalize_language((string) $request['lang']);
         if ($language === null) {
-            return new WP_Error('lazyblog_invalid_language', 'Unsupported language.', ['status' => 400]);
+            return new WP_Error('lazyblog_invalid_language', __('Unsupported language.', 'lazyblog-translations'), ['status' => 400]);
         }
 
         $source_language = $this->get_source_language($post_id);
@@ -1354,6 +1418,7 @@ final class LazyBlog_Translations
         $current_language = $this->effective_language_for_post($post_id);
         $source_label = $languages[$source_language]['label'] ?? strtoupper($source_language);
         $current_label = $current_language === $source_language
+            /* translators: %s is the human-readable source language label, for example English. */
             ? sprintf(__('Original (%s)', 'lazyblog-translations'), $source_label)
             : ($languages[$current_language]['label'] ?? strtoupper($current_language));
 
@@ -1364,6 +1429,7 @@ final class LazyBlog_Translations
             $items .= sprintf(
                 '<a href="#" class="%s" onclick="event.preventDefault()" aria-current="true">%s</a>',
                 esc_attr(implode(' ', $original_classes)),
+                /* translators: %s is the human-readable source language label, for example English. */
                 esc_html(sprintf(__('Original (%s)', 'lazyblog-translations'), $source_label))
             );
         } else {
@@ -1371,6 +1437,7 @@ final class LazyBlog_Translations
                 '<a href="%s" class="%s">%s</a>',
                 esc_url($this->language_url($post_id, $source_language)),
                 esc_attr(implode(' ', $original_classes)),
+                /* translators: %s is the human-readable source language label, for example English. */
                 esc_html(sprintf(__('Original (%s)', 'lazyblog-translations'), $source_label))
             );
         }
@@ -1406,6 +1473,7 @@ final class LazyBlog_Translations
                     esc_attr($label),
                     esc_url(rest_url(sprintf('lazyblog/v1/posts/%d/translations/%s/ensure', $post_id, rawurlencode((string) $language)))),
                     esc_attr($this->translation_request_key($post_id, (string) $language)),
+                    /* translators: %s is the human-readable target language label. */
                     esc_attr(sprintf(__('Click to generate the %s translation.', 'lazyblog-translations'), $label)),
                     esc_html($label)
                 );
@@ -1699,7 +1767,7 @@ final class LazyBlog_Translations
         $endpoint = $this->lazyblog_api_url('jobs');
         $token = $this->api_token();
         if ($endpoint === '' || $token === '') {
-            return new WP_Error('lazyblog_api_not_configured', 'LazyBlog translation API is not configured.', ['status' => 503]);
+            return new WP_Error('lazyblog_api_not_configured', __('LazyBlog translation API is not configured.', 'lazyblog-translations'), ['status' => 503]);
         }
 
         $payload = $this->translation_api_payload($post_id, $language);
@@ -1721,7 +1789,7 @@ final class LazyBlog_Translations
         $endpoint = $this->lazyblog_api_url('job');
         $token = $this->api_token();
         if ($endpoint === '' || $token === '') {
-            return new WP_Error('lazyblog_api_not_configured', 'LazyBlog translation API is not configured.', ['status' => 503]);
+            return new WP_Error('lazyblog_api_not_configured', __('LazyBlog translation API is not configured.', 'lazyblog-translations'), ['status' => 503]);
         }
 
         $url = add_query_arg('id', rawurlencode($job_id), $endpoint);
@@ -1781,7 +1849,7 @@ final class LazyBlog_Translations
         $endpoint = $this->direct_provider_endpoint($provider);
         $api_key = $this->direct_provider_api_key($provider);
         if ($endpoint === '' || $api_key === '') {
-            return new WP_Error('lazyblog_direct_provider_not_configured', 'Direct translation provider is not configured.', ['status' => 503]);
+            return new WP_Error('lazyblog_direct_provider_not_configured', __('Direct translation provider is not configured.', 'lazyblog-translations'), ['status' => 503]);
         }
 
         $payload = $this->direct_provider_payload($post_id, $language, $provider);
@@ -1857,11 +1925,11 @@ final class LazyBlog_Translations
         $body = (string) wp_remote_retrieve_body($response);
         $decoded = json_decode($body, true);
         if (!is_array($decoded)) {
-            return new WP_Error('lazyblog_direct_provider_bad_response', 'Direct provider returned invalid JSON.', ['status' => 502, 'body' => $body]);
+            return new WP_Error('lazyblog_direct_provider_bad_response', __('Direct provider returned invalid JSON.', 'lazyblog-translations'), ['status' => 502, 'body' => $body]);
         }
 
         if ($code < 200 || $code >= 300) {
-            $message = (string) ($decoded['error']['message'] ?? 'Direct provider request failed.');
+            $message = (string) ($decoded['error']['message'] ?? __('Direct provider request failed.', 'lazyblog-translations'));
             return new WP_Error('lazyblog_direct_provider_failed', $message, ['status' => $code ?: 502, 'body' => $decoded]);
         }
 
@@ -1872,7 +1940,7 @@ final class LazyBlog_Translations
         }
 
         if (trim((string) ($translation['content'] ?? '')) === '') {
-            return new WP_Error('lazyblog_direct_provider_empty_content', 'Direct provider returned an empty translation.', ['status' => 502]);
+            return new WP_Error('lazyblog_direct_provider_empty_content', __('Direct provider returned an empty translation.', 'lazyblog-translations'), ['status' => 502]);
         }
 
         return [
@@ -1898,7 +1966,7 @@ final class LazyBlog_Translations
         }
 
         if (!is_array($decoded)) {
-            return new WP_Error('lazyblog_direct_provider_unparseable_content', 'Direct provider response did not contain a valid translation JSON object.', ['status' => 502, 'content' => $content]);
+            return new WP_Error('lazyblog_direct_provider_unparseable_content', __('Direct provider response did not contain a valid translation JSON object.', 'lazyblog-translations'), ['status' => 502, 'content' => $content]);
         }
 
         return $decoded;
@@ -1914,11 +1982,11 @@ final class LazyBlog_Translations
         $body = (string) wp_remote_retrieve_body($response);
         $decoded = json_decode($body, true);
         if (!is_array($decoded)) {
-            return new WP_Error('lazyblog_api_bad_response', 'LazyBlog API returned invalid JSON.', ['status' => 502, 'body' => $body]);
+            return new WP_Error('lazyblog_api_bad_response', __('LazyBlog API returned invalid JSON.', 'lazyblog-translations'), ['status' => 502, 'body' => $body]);
         }
 
         if ($code < 200 || $code >= 300 || empty($decoded['ok'])) {
-            return new WP_Error('lazyblog_api_failed', 'LazyBlog API request failed.', ['status' => $code ?: 502, 'body' => $decoded]);
+            return new WP_Error('lazyblog_api_failed', __('LazyBlog API request failed.', 'lazyblog-translations'), ['status' => $code ?: 502, 'body' => $decoded]);
         }
 
         return $decoded;
