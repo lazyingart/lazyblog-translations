@@ -46,7 +46,7 @@ final class LazyBlog_Translations
     private const DEFAULT_OPENAI_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
     private const DEFAULT_OPENAI_MODEL = 'gpt-4o';
     private const DEFAULT_DEEPSEEK_ENDPOINT = 'https://api.deepseek.com/chat/completions';
-    private const DEFAULT_DEEPSEEK_MODEL = 'deepseek-chat';
+    private const DEFAULT_DEEPSEEK_MODEL = 'deepseek-v4-flash';
     private const TRANSLATION_SIGNATURE_TTL = 3600;
 
     private static ?self $instance = null;
@@ -479,7 +479,7 @@ final class LazyBlog_Translations
             esc_attr($this->deepseek_model()),
             esc_attr(self::DEFAULT_DEEPSEEK_MODEL)
         );
-        echo '<p class="description">' . esc_html__('Default: deepseek-chat.', 'lazyblog-translations') . '</p></td></tr>';
+        echo '<p class="description">' . esc_html__('Default: deepseek-v4-flash.', 'lazyblog-translations') . '</p></td></tr>';
         echo '</table>';
         submit_button();
         echo '</form></div>';

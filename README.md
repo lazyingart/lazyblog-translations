@@ -29,7 +29,7 @@ LazyBlog Translations supports three provider modes from WordPress Settings > La
 
 - `Codex / LazyBlog local API`: calls a local LazyBlog API service. Use this for the full Codex workflow with polishing, Markdown sync, and richer post maintenance.
 - `OpenAI direct API`: calls the OpenAI Chat Completions API directly from WordPress. Default model: `gpt-4o`. No local API service is required.
-- `DeepSeek direct API`: calls the DeepSeek OpenAI-compatible chat endpoint directly from WordPress. Default model: `deepseek-chat`. No local API service is required.
+- `DeepSeek direct API`: calls the DeepSeek OpenAI-compatible chat endpoint directly from WordPress. Default model: `deepseek-v4-flash`. No local API service is required.
 
 If you choose the Codex provider, prepare the local service from the LazyBlog repo:
 
@@ -79,4 +79,3 @@ If this plugin helps your publishing workflow, sponsor the maintainers:
 
 - Adds LazyingArt LLC plugin metadata and a fixed `Update URI`.
 - Adds a guarded self-migration endpoint for moving accidental installs from a conflicting plugin slug into `lazyblog-translations/lazyblog-translations.php`.
-
