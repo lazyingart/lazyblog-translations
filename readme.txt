@@ -3,8 +3,8 @@ Contributors: lazyingart
 Tags: multilingual, translation, markdown, lazyblog, openai, deepseek
 Requires at least: 6.5
 Tested up to: 6.9
-Requires PHP: 8.0
-Stable tag: 0.4.7
+Requires PHP: 7.4
+Stable tag: 0.4.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,9 @@ Use WordPress options for provider keys and local `.env` files for the LazyBlog 
 * https://github.com/sponsors/lazyingart
 
 == Changelog ==
+
+= 0.4.8 =
+* Lowered the declared PHP requirement to 7.4 to match the plugin code and the live WordPress host.
 
 = 0.4.7 =
 * Added WordPress i18n loading, domain path, and POT template.

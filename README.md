@@ -14,6 +14,7 @@
 </div>
 
 [![WordPress](https://img.shields.io/badge/WordPress-Plugin-21759B?style=for-the-badge&logo=wordpress&logoColor=white)](https://wordpress.org)
+[![PHP](https://img.shields.io/badge/PHP-7.4%2B-777BB4?style=for-the-badge&logo=php&logoColor=white)](#quick-start)
 [![LazyingArt LLC](https://img.shields.io/badge/LazyingArt-LLC-0f766e?style=for-the-badge)](https://lazying.art)
 [![Live Blog](https://img.shields.io/badge/Live-blog.lazying.art-111827?style=for-the-badge&logo=googlechrome&logoColor=white)](https://blog.lazying.art)
 [![i18n](https://img.shields.io/badge/i18n-WordPress%20Textdomain%20%2B%20README-0EA5E9?style=for-the-badge)](#internationalization)
@@ -125,6 +126,10 @@ wp i18n make-pot . languages/lazyblog-translations.pot --slug=lazyblog-translati
 
 ## Release Notes
 
+### 0.4.8
+
+- Lowers the declared PHP requirement to 7.4, matching the plugin code and the live WordPress host.
+
 ### 0.4.7
 
 - Adds WordPress i18n loading and a translation template.
@@ -143,4 +148,3 @@ wp i18n make-pot . languages/lazyblog-translations.pot --slug=lazyblog-translati
 
 - Adds LazyingArt LLC plugin metadata and a fixed `Update URI`.
 - Adds a guarded self-migration endpoint for moving accidental installs from a conflicting plugin slug into `lazyblog-translations/lazyblog-translations.php`.
-
