@@ -4,7 +4,7 @@ Tags: multilingual, translation, markdown, lazyblog, openai, deepseek
 Requires at least: 6.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 0.4.8
+Stable tag: 0.4.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,11 @@ Use WordPress options for provider keys and local `.env` files for the LazyBlog 
 * https://github.com/sponsors/lazyingart
 
 == Changelog ==
+
+= 0.4.9 =
+* Made on-demand translation polling state-aware so existing jobs no longer consume the new-translation start quota.
+* Allowed concurrent translation starts across different languages while still rate-limiting first-time job starts per IP and post/language.
+* Added stale LazyBlog job recovery so clicking a language again can rerun a stuck translation after 20 minutes.
 
 = 0.4.8 =
 * Lowered the declared PHP requirement to 7.4 to match the plugin code and the live WordPress host.

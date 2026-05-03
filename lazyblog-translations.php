@@ -3,7 +3,7 @@
  * Plugin Name: LazyBlog Translations
  * Plugin URI: https://lazying.art
  * Description: Stores post translations managed by LazyBlog Markdown workflows, renders a lightweight language switcher, and handles local math rendering.
- * Version: 0.4.8
+ * Version: 0.4.9
  * Requires at least: 6.5
  * Requires PHP: 7.4
  * Author: LazyingArt LLC
@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
 
 final class LazyBlog_Translations
 {
-    private const PLUGIN_VERSION = '0.4.8';
+    private const PLUGIN_VERSION = '0.4.9';
     private const PLUGIN_REPO_URL = 'https://github.com/lazyingart/lazyblog-translations';
     private const LAZYBLOG_REPO_URL = 'https://github.com/lazyingart/LazyBlog';
     private const LAZYBLOG_INSTALL_SCRIPT_URL = 'https://github.com/lazyingart/lazyblog-translations/blob/main/tools/install_lazyblog_translation_api.sh';
@@ -53,6 +53,9 @@ final class LazyBlog_Translations
     private const DEFAULT_DEEPSEEK_ENDPOINT = 'https://api.deepseek.com/chat/completions';
     private const DEFAULT_DEEPSEEK_MODEL = 'deepseek-v4-flash';
     private const TRANSLATION_SIGNATURE_TTL = 3600;
+    private const TRANSLATION_JOB_STALE_SECONDS = 1200;
+    private const TRANSLATION_START_LIMIT_PER_IP = 30;
+    private const TRANSLATION_START_LIMIT_PER_LANGUAGE = 4;
 
     private static ?self $instance = null;
 
@@ -676,7 +679,7 @@ scripts/install_lazyblog_translation_api.sh</code></pre>',
             return new WP_Error('lazyblog_bad_translation_signature', __('Invalid or expired translation signature.', 'lazyblog-translations'), ['status' => 403]);
         }
 
-        if (!$this->rate_limit_ok()) {
+        if (!$this->translation_request_has_existing_state($post_id, $language) && !$this->rate_limit_ok($post_id, $language)) {
             return new WP_Error('lazyblog_translation_rate_limited', __('Too many translation requests. Try again later.', 'lazyblog-translations'), ['status' => 429]);
         }
 
@@ -870,13 +873,19 @@ scripts/install_lazyblog_translation_api.sh</code></pre>',
             return $this->rest_ensure_direct_provider_translation($post_id, $language, $redirect_url);
         }
 
-        $jobs = $this->get_translation_jobs($post_id);
-        $job = $jobs[$language] ?? null;
-        if (is_array($job) && !empty($job['job_id']) && in_array(($job['status'] ?? ''), ['queued', 'running'], true)) {
-            $polled = $this->poll_lazyblog_translation_job((string) $job['job_id']);
-            $response = $this->handle_translation_job_response($post_id, $language, $polled, $redirect_url);
-            if ($response !== null) {
-                return $response;
+        $job = $this->translation_job_for_language($post_id, $language);
+        if ($this->translation_job_is_active($job) && !empty($job['job_id'])) {
+            if ($this->translation_job_is_stale($job)) {
+                $this->update_translation_job($post_id, $language, [
+                    'status' => 'failed',
+                    'error' => __('Previous translation job became stale. Click started a fresh job.', 'lazyblog-translations'),
+                ]);
+            } else {
+                $polled = $this->poll_lazyblog_translation_job((string) $job['job_id']);
+                $response = $this->handle_translation_job_response($post_id, $language, $polled, $redirect_url);
+                if ($response !== null) {
+                    return $response;
+                }
             }
         }
 
@@ -1564,16 +1573,33 @@ scripts/install_lazyblog_translation_api.sh</code></pre>',
         return hash_equals($this->translation_signature($post_id, $language, $expires), $signature);
     }
 
-    private function rate_limit_ok(): bool
+    private function translation_request_has_existing_state(int $post_id, string $language): bool
+    {
+        if ($language === $this->get_source_language($post_id) || $this->language_has_translation($post_id, $language)) {
+            return true;
+        }
+
+        if (get_transient($this->translation_lock_key($post_id, $language))) {
+            return true;
+        }
+
+        return $this->translation_job_for_language($post_id, $language) !== null;
+    }
+
+    private function rate_limit_ok(int $post_id, string $language): bool
     {
         $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-        $key = 'lazyblog_translate_rate_' . md5((string) $ip);
-        $count = (int) get_transient($key);
-        if ($count >= 120) {
+        $global_key = 'lazyblog_translate_start_ip_' . md5((string) $ip);
+        $language_key = 'lazyblog_translate_start_lang_' . md5((string) $ip . '|' . $post_id . '|' . $language);
+        $global_count = (int) get_transient($global_key);
+        $language_count = (int) get_transient($language_key);
+
+        if ($global_count >= self::TRANSLATION_START_LIMIT_PER_IP || $language_count >= self::TRANSLATION_START_LIMIT_PER_LANGUAGE) {
             return false;
         }
 
-        set_transient($key, $count + 1, 10 * MINUTE_IN_SECONDS);
+        set_transient($global_key, $global_count + 1, 10 * MINUTE_IN_SECONDS);
+        set_transient($language_key, $language_count + 1, 10 * MINUTE_IN_SECONDS);
         return true;
     }
 
@@ -1581,6 +1607,37 @@ scripts/install_lazyblog_translation_api.sh</code></pre>',
     {
         $jobs = get_post_meta($post_id, self::META_TRANSLATION_JOBS, true);
         return is_array($jobs) ? $jobs : [];
+    }
+
+    private function translation_job_for_language(int $post_id, string $language): ?array
+    {
+        $jobs = $this->get_translation_jobs($post_id);
+        $job = $jobs[$language] ?? null;
+        return is_array($job) ? $job : null;
+    }
+
+    private function translation_job_is_active(?array $job): bool
+    {
+        return is_array($job) && in_array((string) ($job['status'] ?? ''), ['queued', 'running'], true);
+    }
+
+    private function translation_job_is_stale(?array $job): bool
+    {
+        if (!$this->translation_job_is_active($job)) {
+            return false;
+        }
+
+        $updated_at = is_array($job) ? (string) ($job['updated_at'] ?? '') : '';
+        if ($updated_at === '') {
+            return true;
+        }
+
+        $timestamp = strtotime($updated_at . ' UTC');
+        if ($timestamp === false) {
+            return true;
+        }
+
+        return time() - $timestamp > self::TRANSLATION_JOB_STALE_SECONDS;
     }
 
     private function update_translation_job(int $post_id, string $language, array $job): void

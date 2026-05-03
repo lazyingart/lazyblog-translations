@@ -126,6 +126,12 @@ wp i18n make-pot . languages/lazyblog-translations.pot --slug=lazyblog-translati
 
 ## Release Notes
 
+### 0.4.9
+
+- Makes on-demand translation polling state-aware so existing jobs no longer consume the new-translation start quota.
+- Allows concurrent translation starts across different languages while still rate-limiting first-time job starts per IP and post/language.
+- Marks stale queued/running LazyBlog jobs as failed after 20 minutes so clicking the language again can rerun the translation.
+
 ### 0.4.8
 
 - Lowers the declared PHP requirement to 7.4, matching the plugin code and the live WordPress host.
