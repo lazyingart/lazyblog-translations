@@ -73,10 +73,10 @@ cd lazyblog-translations
 tools/install_lazyblog_translation_api.sh
 ```
 
-LazyBlog workflow repo setup:
+LazyBlog operator repo direct setup:
 
 ```bash
-git clone https://github.com/lazyingart/LazyBlog.git
+git clone https://github.com/lachlanchen/LazyBlog.git
 cd LazyBlog
 scripts/install_lazyblog_translation_api.sh
 ```
@@ -108,14 +108,14 @@ wp i18n make-pot . languages/lazyblog-translations.pot --slug=lazyblog-translati
 - Public frontend clicks use signed, short-lived post/language requests.
 - Provider keys stay server-side in WordPress options or constants.
 - Browser code never receives OpenAI, DeepSeek, or LazyBlog bearer tokens.
-- Do not commit `.env`, exported posts, API keys, application passwords, or deployment logs.
+- Do not commit `.env`, exported private posts, API keys, application passwords, or deployment logs.
 
 ## Links
 
 - LazyingArt LLC: https://lazying.art
 - Live blog: https://blog.lazying.art
 - Plugin source: https://github.com/lazyingart/lazyblog-translations
-- LazyBlog workflow source: https://github.com/lazyingart/LazyBlog
+- LazyBlog workflow source: https://github.com/lachlanchen/LazyBlog
 - Maintainer: https://github.com/lachlanchen
 
 ## Support
@@ -125,6 +125,10 @@ wp i18n make-pot . languages/lazyblog-translations.pot --slug=lazyblog-translati
 | [![Donate](https://img.shields.io/badge/Donate-LazyingArt-0EA5E9?style=for-the-badge&logo=ko-fi&logoColor=white)](https://chat.lazying.art/donate) | [![PayPal](https://img.shields.io/badge/PayPal-RongzhouChen-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/RongzhouChen) | [![Stripe](https://img.shields.io/badge/Stripe-Donate-635BFF?style=for-the-badge&logo=stripe&logoColor=white)](https://buy.stripe.com/aFadR8gIaflgfQV6T4fw400) |
 
 ## Release Notes
+
+### 0.4.10
+
+- Clears stale job error text when a retry later succeeds or returns to an active queued/running state.
 
 ### 0.4.9
 

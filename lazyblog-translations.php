@@ -3,7 +3,7 @@
  * Plugin Name: LazyBlog Translations
  * Plugin URI: https://lazying.art
  * Description: Stores post translations managed by LazyBlog Markdown workflows, renders a lightweight language switcher, and handles local math rendering.
- * Version: 0.4.9
+ * Version: 0.4.10
  * Requires at least: 6.5
  * Requires PHP: 7.4
  * Author: LazyingArt LLC
@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
 
 final class LazyBlog_Translations
 {
-    private const PLUGIN_VERSION = '0.4.9';
+    private const PLUGIN_VERSION = '0.4.10';
     private const PLUGIN_REPO_URL = 'https://github.com/lazyingart/lazyblog-translations';
     private const LAZYBLOG_REPO_URL = 'https://github.com/lazyingart/LazyBlog';
     private const LAZYBLOG_INSTALL_SCRIPT_URL = 'https://github.com/lazyingart/lazyblog-translations/blob/main/tools/install_lazyblog_translation_api.sh';
@@ -1644,6 +1644,9 @@ scripts/install_lazyblog_translation_api.sh</code></pre>',
     {
         $jobs = $this->get_translation_jobs($post_id);
         $jobs[$language] = array_merge($jobs[$language] ?? [], $job, ['updated_at' => current_time('mysql', true)]);
+        if (isset($job['status']) && $job['status'] !== 'failed' && !array_key_exists('error', $job)) {
+            unset($jobs[$language]['error']);
+        }
         update_post_meta($post_id, self::META_TRANSLATION_JOBS, $jobs);
     }
 
