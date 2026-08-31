@@ -4,7 +4,7 @@ Tags: multilingual, translation, markdown, lazyblog, openai, deepseek
 Requires at least: 6.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 0.4.10
+Stable tag: 0.4.11
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,7 +12,7 @@ WordPress translation storage, provider switching, and language-switcher renderi
 
 == Description ==
 
-LazyBlog Translations stores post source language and per-language translations in WordPress post meta. It renders a lightweight floating language switcher and can request missing translations from Codex/LazyBlog, OpenAI, or DeepSeek.
+LazyBlog Translations stores post source language and per-language translations in WordPress post meta. It renders a lightweight floating language switcher, can request missing translations from Codex/LazyBlog, OpenAI, or DeepSeek, and reuses reviewed excerpts for search and social metadata.
 
 The Codex/LazyBlog provider calls a local LazyBlog API service for richer Markdown publishing workflows. OpenAI and DeepSeek direct providers call hosted chat APIs from WordPress and do not require the local API service.
 
@@ -30,6 +30,7 @@ Links:
 * Provider switch: Codex/LazyBlog local API, OpenAI direct API, or DeepSeek direct API.
 * Signed frontend requests and server-side token/key forwarding.
 * MathJax rendering for Markdown-origin math content.
+* Translation-aware search descriptions and Open Graph/X card metadata for single posts.
 * WordPress i18n support with text domain, domain path, and POT template.
 * Admin settings for LazyBlog endpoint/token/model/reasoning, OpenAI endpoint/key/model, and DeepSeek endpoint/key/model.
 
@@ -73,6 +74,10 @@ Use WordPress options for provider keys and local `.env` files for the LazyBlog 
 * https://github.com/sponsors/lazyingart
 
 == Changelog ==
+
+= 0.4.11 =
+* Added translation-aware search descriptions and Open Graph/X card metadata for single posts.
+* Yielded metadata output to common dedicated SEO plugins to avoid duplicate tags.
 
 = 0.4.10 =
 * Cleared stale job error text when a retry later succeeds or returns to an active queued/running state.

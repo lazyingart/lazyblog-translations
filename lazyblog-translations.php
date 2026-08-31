@@ -3,7 +3,7 @@
  * Plugin Name: LazyBlog Translations
  * Plugin URI: https://lazying.art
  * Description: Stores post translations managed by LazyBlog Markdown workflows, renders a lightweight language switcher, and handles local math rendering.
- * Version: 0.4.10
+ * Version: 0.4.11
  * Requires at least: 6.5
  * Requires PHP: 7.4
  * Author: LazyingArt LLC
@@ -21,9 +21,9 @@ if (!defined('ABSPATH')) {
 
 final class LazyBlog_Translations
 {
-    private const PLUGIN_VERSION = '0.4.10';
+    private const PLUGIN_VERSION = '0.4.11';
     private const PLUGIN_REPO_URL = 'https://github.com/lazyingart/lazyblog-translations';
-    private const LAZYBLOG_REPO_URL = 'https://github.com/lazyingart/LazyBlog';
+    private const LAZYBLOG_REPO_URL = 'https://github.com/lachlanchen/LazyBlog';
     private const LAZYBLOG_INSTALL_SCRIPT_URL = 'https://github.com/lazyingart/lazyblog-translations/blob/main/tools/install_lazyblog_translation_api.sh';
     private const LAZYBLOG_INSTALL_SCRIPT_RAW_URL = 'https://raw.githubusercontent.com/lazyingart/lazyblog-translations/main/tools/install_lazyblog_translation_api.sh';
     private const PROVIDER_LAZYBLOG = 'lazyblog';
@@ -85,6 +85,7 @@ final class LazyBlog_Translations
         add_action('admin_init', [$this, 'register_settings']);
         add_action('rest_api_init', [$this, 'register_rest_routes']);
         add_action('wp_enqueue_scripts', [$this, 'enqueue_styles'], 100);
+        add_action('wp_head', [$this, 'render_social_meta'], 5);
 
         add_shortcode('math', [$this, 'render_inline_math_shortcode']);
         add_shortcode('latex', [$this, 'render_display_math_shortcode']);
@@ -999,6 +1000,74 @@ scripts/install_lazyblog_translation_api.sh</code></pre>',
         return (string) $translation['title'];
     }
 
+    public function render_social_meta(): void
+    {
+        if (is_admin() || !is_singular('post') || $this->third_party_seo_meta_is_active()) {
+            return;
+        }
+
+        $post = get_queried_object();
+        if (!$post instanceof WP_Post || $post->post_status !== 'publish') {
+            return;
+        }
+
+        if (!apply_filters('lazyblog_render_social_meta', true, $post)) {
+            return;
+        }
+
+        $language = $this->effective_language_for_post($post->ID);
+        $source_language = $this->get_source_language($post->ID);
+        $translation = $language === $source_language
+            ? null
+            : $this->get_translation($post->ID, $language);
+        $title = is_array($translation) && trim((string) ($translation['title'] ?? '')) !== ''
+            ? trim((string) $translation['title'])
+            : get_the_title($post);
+        $description_source = is_array($translation)
+            ? (string) ($translation['excerpt'] ?? '')
+            : (string) $post->post_excerpt;
+
+        if (trim($description_source) === '') {
+            $description_source = is_array($translation) && !empty($translation['content'])
+                ? (string) $translation['content']
+                : (string) $post->post_content;
+        }
+
+        $description = $this->social_meta_description($description_source);
+        $permalink = get_permalink($post);
+        if ($title === '' || $description === '' || !is_string($permalink) || $permalink === '') {
+            return;
+        }
+
+        $url = $language === $source_language
+            ? $permalink
+            : $this->language_url($post->ID, $language);
+        $locale = $this->language_locale($language) ?: str_replace('-', '_', $language);
+        $site_name = get_bloginfo('name');
+        $image_url = '';
+        $image_id = get_post_thumbnail_id($post);
+        if ($image_id) {
+            $candidate = wp_get_attachment_image_url($image_id, 'full');
+            $image_url = is_string($candidate) ? $candidate : '';
+        }
+
+        echo "\n<!-- LazyBlog social metadata -->\n";
+        printf("<meta name=\"description\" content=\"%s\" />\n", esc_attr($description));
+        printf("<meta property=\"og:type\" content=\"article\" />\n");
+        printf("<meta property=\"og:title\" content=\"%s\" />\n", esc_attr($title));
+        printf("<meta property=\"og:description\" content=\"%s\" />\n", esc_attr($description));
+        printf("<meta property=\"og:url\" content=\"%s\" />\n", esc_url($url));
+        printf("<meta property=\"og:site_name\" content=\"%s\" />\n", esc_attr($site_name));
+        printf("<meta property=\"og:locale\" content=\"%s\" />\n", esc_attr($locale));
+        printf("<meta name=\"twitter:card\" content=\"%s\" />\n", $image_url !== '' ? 'summary_large_image' : 'summary');
+        printf("<meta name=\"twitter:title\" content=\"%s\" />\n", esc_attr($title));
+        printf("<meta name=\"twitter:description\" content=\"%s\" />\n", esc_attr($description));
+        if ($image_url !== '') {
+            printf("<meta property=\"og:image\" content=\"%s\" />\n", esc_url($image_url));
+            printf("<meta name=\"twitter:image\" content=\"%s\" />\n", esc_url($image_url));
+        }
+    }
+
     public function filter_listing_content(string $content): string
     {
         if (is_admin() || is_singular('post') || !in_the_loop() || !is_main_query()) {
@@ -1417,6 +1486,25 @@ scripts/install_lazyblog_translation_api.sh</code></pre>',
     {
         $languages = $this->languages();
         return isset($languages[$language]['dir']) && $languages[$language]['dir'] === 'rtl' ? 'rtl' : 'ltr';
+    }
+
+    private function social_meta_description(string $source): string
+    {
+        $source = strip_shortcodes($source);
+        $source = wp_strip_all_tags($source, true);
+        $source = preg_replace('/\s+/u', ' ', $source) ?? $source;
+        $source = trim($source);
+
+        return $source === '' ? '' : wp_html_excerpt($source, 180, '…');
+    }
+
+    private function third_party_seo_meta_is_active(): bool
+    {
+        return defined('WPSEO_VERSION')
+            || defined('RANK_MATH_VERSION')
+            || defined('AIOSEO_VERSION')
+            || defined('SEOPRESS_VERSION')
+            || function_exists('aioseo');
     }
 
     private function render_language_switcher(int $post_id): string

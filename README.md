@@ -40,6 +40,7 @@ LazyBlog Translations keeps WordPress multilingual publishing simple: each post 
 - Generates missing translations through Codex/LazyBlog, OpenAI, or DeepSeek.
 - Prevents duplicate post/language jobs when multiple readers click the same draft language.
 - Preserves Markdown-origin math with MathJax.
+- Reuses reviewed source and translation excerpts for search descriptions and Open Graph/X cards on single posts.
 - Provides WordPress i18n plumbing through `Text Domain: lazyblog-translations` and `Domain Path: /languages`.
 
 ## Providers
@@ -125,6 +126,10 @@ wp i18n make-pot . languages/lazyblog-translations.pot --slug=lazyblog-translati
 | [![Donate](https://img.shields.io/badge/Donate-LazyingArt-0EA5E9?style=for-the-badge&logo=ko-fi&logoColor=white)](https://chat.lazying.art/donate) | [![PayPal](https://img.shields.io/badge/PayPal-RongzhouChen-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/RongzhouChen) | [![Stripe](https://img.shields.io/badge/Stripe-Donate-635BFF?style=for-the-badge&logo=stripe&logoColor=white)](https://buy.stripe.com/aFadR8gIaflgfQV6T4fw400) |
 
 ## Release Notes
+
+### 0.4.11
+
+- Adds translation-aware search descriptions and Open Graph/X card metadata for single posts, while yielding to common dedicated SEO plugins.
 
 ### 0.4.10
 
