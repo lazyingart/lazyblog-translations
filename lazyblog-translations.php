@@ -1495,7 +1495,21 @@ scripts/install_lazyblog_translation_api.sh</code></pre>',
         $source = preg_replace('/\s+/u', ' ', $source) ?? $source;
         $source = trim($source);
 
-        return $source === '' ? '' : wp_html_excerpt($source, 180, '…');
+        if ($source === '') {
+            return '';
+        }
+
+        $excerpt = wp_html_excerpt($source, 180, '');
+        if ($excerpt === $source) {
+            return $source;
+        }
+
+        $word_boundary = preg_replace('/\s+\S*$/u', '', $excerpt);
+        if (is_string($word_boundary) && $word_boundary !== '') {
+            $excerpt = $word_boundary;
+        }
+
+        return rtrim($excerpt) . '…';
     }
 
     private function third_party_seo_meta_is_active(): bool
