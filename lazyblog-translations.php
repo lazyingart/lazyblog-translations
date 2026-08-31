@@ -1509,7 +1509,7 @@ scripts/install_lazyblog_translation_api.sh</code></pre>',
             $excerpt = $word_boundary;
         }
 
-        return rtrim($excerpt) . '…';
+        return rtrim($excerpt, " \t\n\r\0\x0B,;:") . '…';
     }
 
     private function third_party_seo_meta_is_active(): bool
