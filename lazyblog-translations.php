@@ -3,7 +3,7 @@
  * Plugin Name: LazyBlog Translations
  * Plugin URI: https://lazying.art
  * Description: Stores post translations managed by LazyBlog Markdown workflows, renders a lightweight language switcher, and handles local math rendering.
- * Version: 0.4.14
+ * Version: 0.4.15
  * Requires at least: 6.5
  * Requires PHP: 7.4
  * Author: LazyingArt LLC
@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
 
 final class LazyBlog_Translations
 {
-    private const PLUGIN_VERSION = '0.4.14';
+    private const PLUGIN_VERSION = '0.4.15';
     private const PLUGIN_REPO_URL = 'https://github.com/lazyingart/lazyblog-translations';
     private const LAZYBLOG_REPO_URL = 'https://github.com/lachlanchen/LazyBlog';
     private const LAZYBLOG_INSTALL_SCRIPT_URL = 'https://github.com/lazyingart/lazyblog-translations/blob/main/tools/install_lazyblog_translation_api.sh';
@@ -712,6 +712,7 @@ scripts/install_lazyblog_translation_api.sh</code></pre>',
                 return new WP_Error('lazyblog_invalid_language', __('Unsupported source language.', 'lazyblog-translations'), ['status' => 400]);
             }
             update_post_meta($post_id, self::META_SOURCE_LANGUAGE, $source_language);
+            $this->purge_site_caches();
         }
 
         return $this->rest_get_translations($request);
@@ -764,6 +765,7 @@ scripts/install_lazyblog_translation_api.sh</code></pre>',
         ];
 
         update_post_meta($post_id, self::META_TRANSLATIONS, $translations);
+        $this->purge_site_caches();
 
         return new WP_REST_Response([
             'post_id' => $post_id,
@@ -783,6 +785,7 @@ scripts/install_lazyblog_translation_api.sh</code></pre>',
         $translations = $this->get_translations($post_id);
         unset($translations[$language]);
         update_post_meta($post_id, self::META_TRANSLATIONS, $translations);
+        $this->purge_site_caches();
 
         return new WP_REST_Response([
             'post_id' => $post_id,

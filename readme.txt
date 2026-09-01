@@ -4,7 +4,7 @@ Tags: multilingual, translation, markdown, lazyblog, openai, deepseek
 Requires at least: 6.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 0.4.14
+Stable tag: 0.4.15
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -76,6 +76,9 @@ Use WordPress options for provider keys and local `.env` files for the LazyBlog 
 * https://github.com/sponsors/lazyingart
 
 == Changelog ==
+
+= 0.4.15 =
+* Purged WordPress object and page caches after REST-managed translation changes.
 
 = 0.4.14 =
 * Used each reviewed translation title in the HTML document title for language-prefixed post pages.

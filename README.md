@@ -129,6 +129,10 @@ wp i18n make-pot . languages/lazyblog-translations.pot --slug=lazyblog-translati
 
 ## Release Notes
 
+### 0.4.15
+
+- Purges WordPress object and page caches after operator-managed translation updates, deletions, and source-language changes so reviewed content appears immediately.
+
 ### 0.4.14
 
 - Uses the reviewed translation title in the browser and search-result document title instead of inheriting the source-language title.
