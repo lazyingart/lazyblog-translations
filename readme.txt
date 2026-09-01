@@ -4,7 +4,7 @@ Tags: multilingual, translation, markdown, lazyblog, openai, deepseek
 Requires at least: 6.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 0.4.12
+Stable tag: 0.4.13
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -75,6 +75,9 @@ Use WordPress options for provider keys and local `.env` files for the LazyBlog 
 * https://github.com/sponsors/lazyingart
 
 == Changelog ==
+
+= 0.4.13 =
+* Preserved the originating campaign on the exact LKT sample-report path using the same validated four-field bridge as the fit-check path.
 
 = 0.4.12 =
 * Preserved the originating campaign on LKT fit-check links by forwarding only four validated UTM fields to the exact first-party destination.

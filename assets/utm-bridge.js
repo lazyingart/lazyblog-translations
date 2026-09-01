@@ -26,7 +26,7 @@
     if (
       target.protocol !== 'https:' ||
       target.hostname !== 'lazying.art' ||
-      !/^\/lkt\/fit-check\/?$/.test(target.pathname)
+      !/^\/lkt\/(?:fit-check|sample-report)\/?$/.test(target.pathname)
     ) {
       return;
     }

@@ -128,6 +128,10 @@ wp i18n make-pot . languages/lazyblog-translations.pot --slug=lazyblog-translati
 
 ## Release Notes
 
+### 0.4.13
+
+- Preserves the originating campaign on the exact LKT sample-report path as well as the fit-check path, while retaining the same four-field validation and first-party scope.
+
 ### 0.4.12
 
 - Preserves the originating campaign on exact LKT fit-check links while rejecting arbitrary query values and leaving third-party links untouched.
