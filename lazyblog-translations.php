@@ -3,7 +3,7 @@
  * Plugin Name: LazyBlog Translations
  * Plugin URI: https://lazying.art
  * Description: Stores post translations managed by LazyBlog Markdown workflows, renders a lightweight language switcher, and handles local math rendering.
- * Version: 0.4.11
+ * Version: 0.4.12
  * Requires at least: 6.5
  * Requires PHP: 7.4
  * Author: LazyingArt LLC
@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
 
 final class LazyBlog_Translations
 {
-    private const PLUGIN_VERSION = '0.4.11';
+    private const PLUGIN_VERSION = '0.4.12';
     private const PLUGIN_REPO_URL = 'https://github.com/lazyingart/lazyblog-translations';
     private const LAZYBLOG_REPO_URL = 'https://github.com/lachlanchen/LazyBlog';
     private const LAZYBLOG_INSTALL_SCRIPT_URL = 'https://github.com/lazyingart/lazyblog-translations/blob/main/tools/install_lazyblog_translation_api.sh';
@@ -1186,6 +1186,13 @@ scripts/install_lazyblog_translation_api.sh</code></pre>',
             wp_register_script('lazyblog-translations', false, [], self::PLUGIN_VERSION, true);
             wp_enqueue_script('lazyblog-translations');
             wp_add_inline_script('lazyblog-translations', $this->switcher_js());
+            wp_enqueue_script(
+                'lazyblog-utm-bridge',
+                plugins_url('assets/utm-bridge.js', __FILE__),
+                [],
+                self::PLUGIN_VERSION,
+                true
+            );
         }
 
         if ($this->current_page_needs_mathjax()) {
