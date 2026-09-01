@@ -13,6 +13,7 @@ LazyBlog Translations 是一个轻量的 WordPress 多语言文章插件。它�
 - 支持 Codex/LazyBlog 本地 API、OpenAI 直连 API、DeepSeek 直连 API。
 - 多个读者同时点击同一个缺失语言时，只启动一个翻译任务。
 - 继续支持 Markdown 迁移过来的数学公式和 MathJax 渲染。
+- 语言前缀文章页的浏览器与搜索结果标题使用已经审核的对应译文标题。
 
 ## 选择翻译后端
 
@@ -50,4 +51,3 @@ OpenAI 和 DeepSeek 后端不需要这个本地服务。
 | Donate | PayPal | Stripe |
 | --- | --- | --- |
 | [![Donate](https://img.shields.io/badge/Donate-LazyingArt-0EA5E9?style=for-the-badge&logo=ko-fi&logoColor=white)](https://chat.lazying.art/donate) | [![PayPal](https://img.shields.io/badge/PayPal-RongzhouChen-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/RongzhouChen) | [![Stripe](https://img.shields.io/badge/Stripe-Donate-635BFF?style=for-the-badge&logo=stripe&logoColor=white)](https://buy.stripe.com/aFadR8gIaflgfQV6T4fw400) |
-

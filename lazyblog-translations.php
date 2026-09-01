@@ -3,7 +3,7 @@
  * Plugin Name: LazyBlog Translations
  * Plugin URI: https://lazying.art
  * Description: Stores post translations managed by LazyBlog Markdown workflows, renders a lightweight language switcher, and handles local math rendering.
- * Version: 0.4.13
+ * Version: 0.4.14
  * Requires at least: 6.5
  * Requires PHP: 7.4
  * Author: LazyingArt LLC
@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
 
 final class LazyBlog_Translations
 {
-    private const PLUGIN_VERSION = '0.4.13';
+    private const PLUGIN_VERSION = '0.4.14';
     private const PLUGIN_REPO_URL = 'https://github.com/lazyingart/lazyblog-translations';
     private const LAZYBLOG_REPO_URL = 'https://github.com/lachlanchen/LazyBlog';
     private const LAZYBLOG_INSTALL_SCRIPT_URL = 'https://github.com/lazyingart/lazyblog-translations/blob/main/tools/install_lazyblog_translation_api.sh';
@@ -93,6 +93,7 @@ final class LazyBlog_Translations
         add_filter('query_vars', [$this, 'register_query_vars']);
         add_filter('request', [$this, 'filter_request_query_vars'], 0);
         add_filter('the_title', [$this, 'filter_title'], 20, 2);
+        add_filter('document_title_parts', [$this, 'filter_document_title_parts'], 20);
         add_filter('the_content', [$this, 'filter_listing_content'], 5);
         add_filter('the_content', [$this, 'filter_content'], 20);
         add_filter('language_attributes', [$this, 'filter_language_attributes'], 20);
@@ -998,6 +999,33 @@ scripts/install_lazyblog_translation_api.sh</code></pre>',
         }
 
         return (string) $translation['title'];
+    }
+
+    public function filter_document_title_parts(array $parts): array
+    {
+        if (is_admin() || !is_singular('post') || !$this->is_translation_context()) {
+            return $parts;
+        }
+
+        $post_id = get_queried_object_id();
+        if ($post_id <= 0) {
+            return $parts;
+        }
+
+        $language = $this->effective_language_for_post($post_id);
+        if ($language === $this->get_source_language($post_id)) {
+            return $parts;
+        }
+
+        $translation = $this->get_translation($post_id, $language);
+        $translated_title = is_array($translation)
+            ? trim((string) ($translation['title'] ?? ''))
+            : '';
+        if ($translated_title !== '') {
+            $parts['title'] = $translated_title;
+        }
+
+        return $parts;
     }
 
     public function render_social_meta(): void

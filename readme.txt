@@ -4,7 +4,7 @@ Tags: multilingual, translation, markdown, lazyblog, openai, deepseek
 Requires at least: 6.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 0.4.13
+Stable tag: 0.4.14
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -31,6 +31,7 @@ Links:
 * Signed frontend requests and server-side token/key forwarding.
 * MathJax rendering for Markdown-origin math content.
 * Translation-aware search descriptions and Open Graph/X card metadata for single posts.
+* Translation-aware HTML document titles on language-prefixed post pages.
 * Allowlisted UTM forwarding from a blog post into the first-party LKT fit-check bridge.
 * WordPress i18n support with text domain, domain path, and POT template.
 * Admin settings for LazyBlog endpoint/token/model/reasoning, OpenAI endpoint/key/model, and DeepSeek endpoint/key/model.
@@ -75,6 +76,9 @@ Use WordPress options for provider keys and local `.env` files for the LazyBlog 
 * https://github.com/sponsors/lazyingart
 
 == Changelog ==
+
+= 0.4.14 =
+* Used each reviewed translation title in the HTML document title for language-prefixed post pages.
 
 = 0.4.13 =
 * Preserved the originating campaign on the exact LKT sample-report path using the same validated four-field bridge as the fit-check path.

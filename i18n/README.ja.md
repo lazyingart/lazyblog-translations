@@ -13,6 +13,7 @@ LazyBlog Translations は、WordPress の投稿に軽量な多言語レイヤー
 - Codex/LazyBlog ローカル API、OpenAI 直接 API、DeepSeek 直接 API を選択可能。
 - 同じ投稿と言語への重複翻訳ジョブを防止。
 - Markdown 由来の数式と MathJax レンダリングを維持。
+- 言語別投稿ページのブラウザーおよび検索結果のタイトルに、確認済みの翻訳タイトルを使用。
 
 ## 翻訳プロバイダー
 
@@ -50,4 +51,3 @@ OpenAI と DeepSeek の直接 API モードでは、このローカルサービ�
 | Donate | PayPal | Stripe |
 | --- | --- | --- |
 | [![Donate](https://img.shields.io/badge/Donate-LazyingArt-0EA5E9?style=for-the-badge&logo=ko-fi&logoColor=white)](https://chat.lazying.art/donate) | [![PayPal](https://img.shields.io/badge/PayPal-RongzhouChen-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/RongzhouChen) | [![Stripe](https://img.shields.io/badge/Stripe-Donate-635BFF?style=for-the-badge&logo=stripe&logoColor=white)](https://buy.stripe.com/aFadR8gIaflgfQV6T4fw400) |
-
