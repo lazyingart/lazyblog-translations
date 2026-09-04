@@ -129,6 +129,10 @@ wp i18n make-pot . languages/lazyblog-translations.pot --slug=lazyblog-translati
 
 ## Release Notes
 
+### 0.4.16
+
+- Gives every reviewed language route its own canonical URL and publishes reciprocal `hreflang` alternates, with the source edition as `x-default`.
+
 ### 0.4.15
 
 - Purges WordPress object and page caches after operator-managed translation updates, deletions, and source-language changes so reviewed content appears immediately.

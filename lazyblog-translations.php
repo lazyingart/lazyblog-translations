@@ -3,7 +3,7 @@
  * Plugin Name: LazyBlog Translations
  * Plugin URI: https://lazying.art
  * Description: Stores post translations managed by LazyBlog Markdown workflows, renders a lightweight language switcher, and handles local math rendering.
- * Version: 0.4.15
+ * Version: 0.4.16
  * Requires at least: 6.5
  * Requires PHP: 7.4
  * Author: LazyingArt LLC
@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
 
 final class LazyBlog_Translations
 {
-    private const PLUGIN_VERSION = '0.4.15';
+    private const PLUGIN_VERSION = '0.4.16';
     private const PLUGIN_REPO_URL = 'https://github.com/lazyingart/lazyblog-translations';
     private const LAZYBLOG_REPO_URL = 'https://github.com/lachlanchen/LazyBlog';
     private const LAZYBLOG_INSTALL_SCRIPT_URL = 'https://github.com/lazyingart/lazyblog-translations/blob/main/tools/install_lazyblog_translation_api.sh';
@@ -86,6 +86,7 @@ final class LazyBlog_Translations
         add_action('rest_api_init', [$this, 'register_rest_routes']);
         add_action('wp_enqueue_scripts', [$this, 'enqueue_styles'], 100);
         add_action('wp_head', [$this, 'render_social_meta'], 5);
+        add_action('wp_head', [$this, 'render_language_alternates'], 6);
 
         add_shortcode('math', [$this, 'render_inline_math_shortcode']);
         add_shortcode('latex', [$this, 'render_display_math_shortcode']);
@@ -97,6 +98,7 @@ final class LazyBlog_Translations
         add_filter('the_content', [$this, 'filter_listing_content'], 5);
         add_filter('the_content', [$this, 'filter_content'], 20);
         add_filter('language_attributes', [$this, 'filter_language_attributes'], 20);
+        add_filter('get_canonical_url', [$this, 'filter_canonical_url'], 20, 2);
         add_filter('redirect_canonical', [$this, 'filter_redirect_canonical'], 20, 2);
     }
 
@@ -1193,6 +1195,76 @@ scripts/install_lazyblog_translation_api.sh</code></pre>',
         }
 
         return trim($output . ' dir="' . esc_attr($direction) . '"');
+    }
+
+    public function filter_canonical_url(string $canonical_url, $post): string
+    {
+        if (
+            is_admin()
+            || !is_singular('post')
+            || !$post instanceof WP_Post
+            || $post->post_status !== 'publish'
+            || $post->ID !== get_queried_object_id()
+        ) {
+            return $canonical_url;
+        }
+
+        $language = $this->effective_language_for_post($post->ID);
+        $source_language = $this->get_source_language($post->ID);
+        if ($language === $source_language) {
+            $permalink = get_permalink($post);
+            return is_string($permalink) && $permalink !== '' ? $permalink : $canonical_url;
+        }
+
+        return $this->language_url($post->ID, $language);
+    }
+
+    public function render_language_alternates(): void
+    {
+        if (is_admin() || !is_singular('post') || $this->third_party_seo_meta_is_active()) {
+            return;
+        }
+
+        $post = get_queried_object();
+        if (!$post instanceof WP_Post || $post->post_status !== 'publish') {
+            return;
+        }
+
+        $permalink = get_permalink($post);
+        if (!is_string($permalink) || $permalink === '') {
+            return;
+        }
+
+        $source_language = $this->get_source_language($post->ID);
+        $alternates = [$source_language => $permalink];
+        foreach ($this->get_translations($post->ID) as $language => $translation) {
+            if ($language === $source_language || empty($translation['content'])) {
+                continue;
+            }
+            $alternates[$language] = $this->language_url($post->ID, $language);
+        }
+
+        echo "\n<!-- LazyBlog language alternates -->\n";
+        foreach ($alternates as $language => $url) {
+            printf(
+                "<link rel=\"alternate\" hreflang=\"%s\" href=\"%s\" />\n",
+                esc_attr($this->hreflang_code((string) $language)),
+                esc_url((string) $url)
+            );
+        }
+        printf("<link rel=\"alternate\" hreflang=\"x-default\" href=\"%s\" />\n", esc_url($permalink));
+    }
+
+    private function hreflang_code(string $language): string
+    {
+        if ($language === 'zh') {
+            return 'zh-Hans';
+        }
+        if ($language === 'zh-hant') {
+            return 'zh-Hant';
+        }
+
+        return $language;
     }
 
     public function filter_redirect_canonical($redirect_url, $requested_url)
