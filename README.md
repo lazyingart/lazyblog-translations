@@ -129,6 +129,10 @@ wp i18n make-pot . languages/lazyblog-translations.pot --slug=lazyblog-translati
 
 ## Release Notes
 
+### 0.4.17
+
+- Preserves literal backslashes in translated code blocks when WordPress stores translation post meta.
+
 ### 0.4.16
 
 - Gives every reviewed language route its own canonical URL and publishes reciprocal `hreflang` alternates, with the source edition as `x-default`.

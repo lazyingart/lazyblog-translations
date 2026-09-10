@@ -3,7 +3,7 @@
  * Plugin Name: LazyBlog Translations
  * Plugin URI: https://lazying.art
  * Description: Stores post translations managed by LazyBlog Markdown workflows, renders a lightweight language switcher, and handles local math rendering.
- * Version: 0.4.16
+ * Version: 0.4.17
  * Requires at least: 6.5
  * Requires PHP: 7.4
  * Author: LazyingArt LLC
@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
 
 final class LazyBlog_Translations
 {
-    private const PLUGIN_VERSION = '0.4.16';
+    private const PLUGIN_VERSION = '0.4.17';
     private const PLUGIN_REPO_URL = 'https://github.com/lazyingart/lazyblog-translations';
     private const LAZYBLOG_REPO_URL = 'https://github.com/lachlanchen/LazyBlog';
     private const LAZYBLOG_INSTALL_SCRIPT_URL = 'https://github.com/lazyingart/lazyblog-translations/blob/main/tools/install_lazyblog_translation_api.sh';
@@ -766,7 +766,7 @@ scripts/install_lazyblog_translation_api.sh</code></pre>',
             'updated_at' => current_time('mysql', true),
         ];
 
-        update_post_meta($post_id, self::META_TRANSLATIONS, $translations);
+        update_post_meta($post_id, self::META_TRANSLATIONS, wp_slash($translations));
         $this->purge_site_caches();
 
         return new WP_REST_Response([
@@ -786,7 +786,7 @@ scripts/install_lazyblog_translation_api.sh</code></pre>',
 
         $translations = $this->get_translations($post_id);
         unset($translations[$language]);
-        update_post_meta($post_id, self::META_TRANSLATIONS, $translations);
+        update_post_meta($post_id, self::META_TRANSLATIONS, wp_slash($translations));
         $this->purge_site_caches();
 
         return new WP_REST_Response([
@@ -2327,7 +2327,7 @@ scripts/install_lazyblog_translation_api.sh</code></pre>',
             'excerpt' => wp_kses_post((string) ($output['excerpt'] ?? '')),
             'updated_at' => current_time('mysql', true),
         ];
-        update_post_meta($post_id, self::META_TRANSLATIONS, $translations);
+        update_post_meta($post_id, self::META_TRANSLATIONS, wp_slash($translations));
         $this->update_translation_job($post_id, $language, [
             'status' => 'succeeded',
             'completed_at' => current_time('mysql', true),
