@@ -2,23 +2,23 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: LazyBlog Translations 0.4.8\n"
+"Project-Id-Version: LazyBlog Translations 0.4.18\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/lazyblog-translations\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-04-25T00:32:42+00:00\n"
+"POT-Creation-Date: 2026-09-27T06:01:03+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: lazyblog-translations\n"
 
 #. Plugin Name of the plugin
 #: lazyblog-translations.php
-#: lazyblog-translations.php:282
-#: lazyblog-translations.php:283
-#: lazyblog-translations.php:391
+#: lazyblog-translations.php:290
+#: lazyblog-translations.php:291
+#: lazyblog-translations.php:404
 msgid "LazyBlog Translations"
 msgstr ""
 
@@ -38,266 +38,296 @@ msgstr ""
 msgid "LazyingArt LLC"
 msgstr ""
 
-#: lazyblog-translations.php:223
+#: lazyblog-translations.php:231
 msgid "LazyBlog Original Language"
 msgstr ""
 
-#: lazyblog-translations.php:237
+#: lazyblog-translations.php:245
 msgid "Original writing language"
 msgstr ""
 
-#: lazyblog-translations.php:248
+#: lazyblog-translations.php:256
 msgid "Controls the Original switcher option and the untranslated post language."
 msgstr ""
 
-#: lazyblog-translations.php:396
+#: lazyblog-translations.php:409
 msgid "Translation provider"
 msgstr ""
 
-#: lazyblog-translations.php:407
+#: lazyblog-translations.php:420
 msgid "Codex uses the local LazyBlog API. OpenAI and DeepSeek call their hosted APIs directly and do not need the local service."
 msgstr ""
 
-#: lazyblog-translations.php:408
-#: lazyblog-translations.php:1601
+#: lazyblog-translations.php:421
+msgid "Optional Codex fallback"
+msgstr ""
+
+#: lazyblog-translations.php:424
+msgid "Use the configured LazyBlog API once if a direct provider has a temporary network, rate-limit, or server failure. Requires a working Codex service."
+msgstr ""
+
+#: lazyblog-translations.php:426
+#: lazyblog-translations.php:1983
 msgid "Codex / LazyBlog local API"
 msgstr ""
 
-#: lazyblog-translations.php:409
-#: lazyblog-translations.php:542
+#: lazyblog-translations.php:427
+#: lazyblog-translations.php:560
 msgid "Codex setup script"
 msgstr ""
 
-#: lazyblog-translations.php:413
+#: lazyblog-translations.php:431
 msgid "Open setup script on GitHub"
 msgstr ""
 
-#: lazyblog-translations.php:419
+#: lazyblog-translations.php:437
 msgid "Use this only for the Codex provider. OpenAI and DeepSeek do not need the local API service."
 msgstr ""
 
-#: lazyblog-translations.php:423
+#: lazyblog-translations.php:441
 msgid "LazyBlog API endpoint"
 msgstr ""
 
-#: lazyblog-translations.php:429
+#: lazyblog-translations.php:447
 msgid "POST endpoint for LazyBlog Studio translation jobs. If you choose Codex, install the local API with scripts/install_lazyblog_translation_api.sh in the LazyBlog repo."
 msgstr ""
 
-#: lazyblog-translations.php:430
+#: lazyblog-translations.php:448
 msgid "LazyBlog bearer token"
 msgstr ""
 
-#: lazyblog-translations.php:436
+#: lazyblog-translations.php:454
 msgid "Stored server-side only. The browser receives only scoped signed post/language requests."
 msgstr ""
 
-#: lazyblog-translations.php:437
+#: lazyblog-translations.php:455
 msgid "Translation model"
 msgstr ""
 
-#: lazyblog-translations.php:444
-msgid "Model sent to LazyBlog Studio for on-demand translations. Default: gpt-5.4."
+#: lazyblog-translations.php:462
+msgid "Model sent to LazyBlog Studio for on-demand translations. Default: gpt-5.5. Must be available to the service account."
 msgstr ""
 
-#: lazyblog-translations.php:445
+#: lazyblog-translations.php:463
 msgid "Translation reasoning"
 msgstr ""
 
-#: lazyblog-translations.php:456
+#: lazyblog-translations.php:474
 msgid "Reasoning effort sent to LazyBlog Studio for on-demand translations. Default: low."
 msgstr ""
 
-#: lazyblog-translations.php:457
+#: lazyblog-translations.php:475
 msgid "Mock API calls"
 msgstr ""
 
-#: lazyblog-translations.php:462
+#: lazyblog-translations.php:480
 msgid "Send mock=true to LazyBlog Studio for local smoke tests."
 msgstr ""
 
-#: lazyblog-translations.php:465
-#: lazyblog-translations.php:1602
+#: lazyblog-translations.php:483
+#: lazyblog-translations.php:1984
 msgid "OpenAI direct API"
 msgstr ""
 
-#: lazyblog-translations.php:466
+#: lazyblog-translations.php:484
 msgid "OpenAI chat endpoint"
 msgstr ""
 
-#: lazyblog-translations.php:473
+#: lazyblog-translations.php:491
 msgid "Default is the OpenAI Chat Completions endpoint."
 msgstr ""
 
-#: lazyblog-translations.php:474
+#: lazyblog-translations.php:492
 msgid "OpenAI API key"
 msgstr ""
 
-#: lazyblog-translations.php:480
-#: lazyblog-translations.php:504
+#: lazyblog-translations.php:498
+#: lazyblog-translations.php:522
 msgid "Stored server-side. The browser never receives this key."
 msgstr ""
 
-#: lazyblog-translations.php:481
+#: lazyblog-translations.php:499
 msgid "OpenAI model"
 msgstr ""
 
-#: lazyblog-translations.php:488
+#: lazyblog-translations.php:506
 msgid "Default: gpt-4o. Direct mode is best for short and medium posts; use Codex/LazyBlog for long polishing workflows."
 msgstr ""
 
-#: lazyblog-translations.php:489
-#: lazyblog-translations.php:1603
+#: lazyblog-translations.php:507
+#: lazyblog-translations.php:1985
 msgid "DeepSeek direct API"
 msgstr ""
 
-#: lazyblog-translations.php:490
+#: lazyblog-translations.php:508
 msgid "DeepSeek chat endpoint"
 msgstr ""
 
-#: lazyblog-translations.php:497
+#: lazyblog-translations.php:515
 msgid "Default is the DeepSeek OpenAI-compatible chat endpoint."
 msgstr ""
 
-#: lazyblog-translations.php:498
+#: lazyblog-translations.php:516
 msgid "DeepSeek API key"
 msgstr ""
 
-#: lazyblog-translations.php:505
+#: lazyblog-translations.php:523
 msgid "DeepSeek model"
 msgstr ""
 
-#: lazyblog-translations.php:512
-msgid "Default: deepseek-v4-flash."
+#: lazyblog-translations.php:530
+msgid "Default: deepseek-flash (V4.1 Flash). Thinking is disabled for efficient translation."
 msgstr ""
 
-#: lazyblog-translations.php:531
+#: lazyblog-translations.php:549
 msgid "One switcher, three translation engines."
 msgstr ""
 
-#: lazyblog-translations.php:532
+#: lazyblog-translations.php:550
 msgid "Choose Codex/LazyBlog for local automation, OpenAI for hosted GPT translation, or DeepSeek for an OpenAI-compatible hosted path. The frontend language switcher keeps the same clean reader experience."
 msgstr ""
 
-#: lazyblog-translations.php:537
+#: lazyblog-translations.php:555
 msgid "Plugin GitHub"
 msgstr ""
 
-#: lazyblog-translations.php:547
+#: lazyblog-translations.php:565
 msgid "Raw installer"
 msgstr ""
 
-#: lazyblog-translations.php:664
+#: lazyblog-translations.php:682
 msgid "Invalid translation request."
 msgstr ""
 
-#: lazyblog-translations.php:668
+#: lazyblog-translations.php:686
 msgid "Post is not public."
 msgstr ""
 
-#: lazyblog-translations.php:676
+#: lazyblog-translations.php:694
 msgid "Invalid or expired translation signature."
 msgstr ""
 
-#: lazyblog-translations.php:680
-msgid "Too many translation requests. Try again later."
-msgstr ""
-
-#: lazyblog-translations.php:707
-#: lazyblog-translations.php:747
+#: lazyblog-translations.php:723
+#: lazyblog-translations.php:764
 msgid "Unsupported source language."
 msgstr ""
 
-#: lazyblog-translations.php:720
-#: lazyblog-translations.php:740
-#: lazyblog-translations.php:775
-#: lazyblog-translations.php:855
+#: lazyblog-translations.php:737
+#: lazyblog-translations.php:757
+#: lazyblog-translations.php:791
+#: lazyblog-translations.php:870
 msgid "Unsupported language."
 msgstr ""
 
-#: lazyblog-translations.php:725
+#: lazyblog-translations.php:742
 msgid "Translation not found."
 msgstr ""
 
-#: lazyblog-translations.php:806
+#: lazyblog-translations.php:821
 msgid "Could not create the LazyBlog plugin directory."
 msgstr ""
 
-#: lazyblog-translations.php:815
+#: lazyblog-translations.php:830
 msgid "Could not copy LazyBlog Translations into its own plugin directory."
 msgstr ""
 
-#: lazyblog-translations.php:846
+#: lazyblog-translations.php:861
 msgid "LazyBlog Translations will load from its own plugin slug on the next request."
 msgstr ""
 
-#: lazyblog-translations.php:889
-msgid "Translation is already starting."
+#: lazyblog-translations.php:895
+#: lazyblog-translations.php:980
+msgid "Translation failed recently. Please wait a minute before retrying."
 msgstr ""
 
-#: lazyblog-translations.php:909
-msgid "Translation job started."
+#: lazyblog-translations.php:907
+msgid "Previous translation job became stale. Click started a fresh job."
 msgstr ""
 
 #: lazyblog-translations.php:924
+msgid "Translation is already starting."
+msgstr ""
+
+#: lazyblog-translations.php:932
+#: lazyblog-translations.php:983
+msgid "Too many translation requests. Try again later."
+msgstr ""
+
+#: lazyblog-translations.php:948
+msgid "Translation job started."
+msgstr ""
+
+#: lazyblog-translations.php:963
 msgid "Translation is already running."
 msgstr ""
 
-#: lazyblog-translations.php:1031
+#: lazyblog-translations.php:1223
 msgid "Continue reading"
 msgstr ""
 
 #. translators: %s is the human-readable source language label, for example English.
-#: lazyblog-translations.php:1422
-#: lazyblog-translations.php:1433
-#: lazyblog-translations.php:1441
+#: lazyblog-translations.php:1724
+#: lazyblog-translations.php:1735
+#: lazyblog-translations.php:1743
 #, php-format
 msgid "Original (%s)"
 msgstr ""
 
 #. translators: %s is the human-readable target language label.
-#: lazyblog-translations.php:1477
+#: lazyblog-translations.php:1779
 #, php-format
 msgid "Click to generate the %s translation."
 msgstr ""
 
-#: lazyblog-translations.php:1493
+#: lazyblog-translations.php:1795
 msgid "Language switcher"
 msgstr ""
 
-#: lazyblog-translations.php:1770
-#: lazyblog-translations.php:1792
+#: lazyblog-translations.php:2152
+#: lazyblog-translations.php:2174
 msgid "LazyBlog translation API is not configured."
 msgstr ""
 
-#: lazyblog-translations.php:1852
+#: lazyblog-translations.php:2234
 msgid "Direct translation provider is not configured."
 msgstr ""
 
-#: lazyblog-translations.php:1928
+#: lazyblog-translations.php:2310
 msgid "Direct provider returned invalid JSON."
 msgstr ""
 
-#: lazyblog-translations.php:1932
+#: lazyblog-translations.php:2314
 msgid "Direct provider request failed."
 msgstr ""
 
-#: lazyblog-translations.php:1943
+#: lazyblog-translations.php:2319
+msgid "Provider did not finish the translation. Nothing was saved. Use the background provider for a longer post."
+msgstr ""
+
+#: lazyblog-translations.php:2323
+msgid "Provider returned an invalid translation."
+msgstr ""
+
+#: lazyblog-translations.php:2332
+msgid "Provider returned invalid translation fields. Nothing was saved."
+msgstr ""
+
+#: lazyblog-translations.php:2337
 msgid "Direct provider returned an empty translation."
 msgstr ""
 
-#: lazyblog-translations.php:1969
+#: lazyblog-translations.php:2368
 msgid "Direct provider response did not contain a valid translation JSON object."
 msgstr ""
 
-#: lazyblog-translations.php:1985
+#: lazyblog-translations.php:2384
 msgid "LazyBlog API returned invalid JSON."
 msgstr ""
 
-#: lazyblog-translations.php:1989
+#: lazyblog-translations.php:2388
 msgid "LazyBlog API request failed."
 msgstr ""
 
-#: lazyblog-translations.php:2036
+#: lazyblog-translations.php:2437
 msgid "Translation job failed."
 msgstr ""

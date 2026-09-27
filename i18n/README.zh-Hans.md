@@ -19,9 +19,11 @@ LazyBlog Translations 是一个轻量的 WordPress 多语言文章插件。它�
 
 | 后端 | 适合场景 | 是否需要本地服务 | 默认模型 |
 | --- | --- | --- | --- |
-| Codex / LazyBlog local API | 长文章、润色、Markdown 同步、图片清理、本地自动化 | 需要 | `gpt-5.4` |
+| Codex / LazyBlog local API | 长文章、润色、Markdown 同步、图片清理、本地自动化 | 需要 | `gpt-5.5` |
 | OpenAI direct API | 从 WordPress 直接生成简单翻译 | 不需要 | `gpt-4o` |
-| DeepSeek direct API | 使用 OpenAI 兼容接口的托管翻译路径 | 不需要 | `deepseek-v4-flash` |
+| DeepSeek direct API | 使用 OpenAI 兼容接口的托管翻译路径 | 不需要 | `deepseek-flash` |
+
+DeepSeek V4.1 Flash 使用精简请求并关闭思考模式。已有译文直接复用，按语言锁定并发任务，不保存截断或格式错误的结果。可选的 Codex 后备仅处理服务暂时故障，默认关闭。详见[可靠性与 token 预算说明](../docs/provider-resilience.md)。
 
 ## Codex 本地 API 安装
 

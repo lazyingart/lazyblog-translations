@@ -19,9 +19,11 @@ LazyBlog Translations は、WordPress の投稿に軽量な多言語レイヤー
 
 | プロバイダー | 向いている用途 | ローカルサービス | 既定モデル |
 | --- | --- | --- | --- |
-| Codex / LazyBlog local API | 長い投稿、推敲、Markdown 同期、画像整理、ローカル自動化 | 必要 | `gpt-5.4` |
+| Codex / LazyBlog local API | 長い投稿、推敲、Markdown 同期、画像整理、ローカル自動化 | 必要 | `gpt-5.5` |
 | OpenAI direct API | WordPress からのシンプルなオンデマンド翻訳 | 不要 | `gpt-4o` |
-| DeepSeek direct API | OpenAI 互換のホスト型翻訳経路 | 不要 | `deepseek-v4-flash` |
+| DeepSeek direct API | OpenAI 互換のホスト型翻訳経路 | 不要 | `deepseek-flash` |
+
+DeepSeek V4.1 Flash は簡潔なリクエストを使い、思考モードを無効にします。保存済みの訳文は再利用し、言語単位のロックで重複生成を防ぎ、不完全な結果は保存しません。一時的な障害時の Codex フォールバックは任意で、既定では無効です。[信頼性とトークン予算](../docs/provider-resilience.md)をご覧ください。
 
 ## Codex ローカル API セットアップ
 

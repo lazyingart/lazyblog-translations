@@ -63,6 +63,12 @@ function sanitize_text_field(string $value): string { return $value; }
 function wp_kses_post(string $value): string { return $value; }
 function current_time($type, $gmt = false): string { return '2026-09-10 00:00:00'; }
 function wp_cache_flush(): bool { return true; }
+function wp_cache_delete(...$args): bool { return true; }
+$GLOBALS['wpdb'] = new class {
+    public string $prefix = 'wp_';
+    public function prepare($sql, ...$args) { return $sql; }
+    public function get_var($sql) { return '1'; }
+};
 
 require dirname(__DIR__) . '/lazyblog-translations.php';
 

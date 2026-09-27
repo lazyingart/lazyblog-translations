@@ -20,7 +20,7 @@
 [![i18n](https://img.shields.io/badge/i18n-WordPress%20Textdomain%20%2B%20README-0EA5E9?style=for-the-badge)](#internationalization)
 [![Codex](https://img.shields.io/badge/Codex-Local%20API-10A37F?style=for-the-badge)](#codex-local-api-setup)
 [![OpenAI](https://img.shields.io/badge/OpenAI-gpt--4o-412991?style=for-the-badge&logo=openai&logoColor=white)](#providers)
-[![DeepSeek](https://img.shields.io/badge/DeepSeek-v4--flash-1D4ED8?style=for-the-badge)](#providers)
+[![DeepSeek](https://img.shields.io/badge/DeepSeek-v4.1--flash-1D4ED8?style=for-the-badge)](#providers)
 [![GitHub Sponsors](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/lachlanchen)
 
 | Jump to | Link |
@@ -49,9 +49,14 @@ LazyBlog Translations keeps WordPress multilingual publishing simple: each post 
 
 | Provider | Best for | Needs local service | Default model |
 | --- | --- | --- | --- |
-| Codex / LazyBlog local API | Long posts, polishing, Markdown sync, image cleanup, local automation | Yes | `gpt-5.4` |
+| Codex / LazyBlog local API | Long posts, polishing, Markdown sync, image cleanup, local automation | Yes | `gpt-5.5` |
 | OpenAI direct API | Simple on-demand translation from WordPress | No | `gpt-4o` |
-| DeepSeek direct API | OpenAI-compatible hosted translation path | No | `deepseek-v4-flash` |
+| DeepSeek direct API | OpenAI-compatible hosted translation path | No | `deepseek-flash` |
+
+DeepSeek V4.1 Flash uses compact requests with thinking disabled. Saved results
+are reused, concurrent work is locked per language, and incomplete outputs are
+never saved. An optional Codex fallback handles temporary provider failures;
+it is off until explicitly enabled. See [provider reliability and token budgets](docs/provider-resilience.md).
 
 The rendering layer is provider-independent. All providers write the same translation data, so a post can be maintained by local Markdown workflows today and direct hosted APIs later.
 

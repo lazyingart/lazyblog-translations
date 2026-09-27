@@ -4,7 +4,7 @@ Tags: multilingual, translation, markdown, lazyblog, openai, deepseek
 Requires at least: 6.5
 Tested up to: 6.9
 Requires PHP: 7.4
-Stable tag: 0.4.17
+Stable tag: 0.4.18
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -76,6 +76,12 @@ Use WordPress options for provider keys and local `.env` files for the LazyBlog 
 * https://github.com/sponsors/lazyingart
 
 == Changelog ==
+
+= 0.4.18 =
+* Use DeepSeek V4.1 Flash (deepseek-flash) without thinking for compact translation requests.
+* Reject incomplete/malformed outputs; preserve saved translations and use atomic per-language generation locks and short metadata merge locks.
+* Add an opt-in, single-job Codex fallback for transient direct-provider failures, with failed-request cooldowns.
+* Update the default Codex model to gpt-5.5; operators must use a current authenticated CLI and verify account model access.
 
 = 0.4.17 =
 * Preserved literal backslashes in translated code blocks stored in post meta.
